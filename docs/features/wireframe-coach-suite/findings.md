@@ -101,3 +101,10 @@
 |---|---|
 | 3중 배포 구조: `skills/`(SSOT) → `.claude/skills/*/SKILL.md`(Claude Code 자동 인식) + `distribution/innohub/`(한글 파일명 등록용) | md는 실행 파일이 아니라 프롬프트 명세 — 플랫폼별 인식 위치가 다름. 파일명은 동작과 무관(정체성은 프론트매터+본문) |
 | 배포 사본 상단에 SSOT 주석(YAML 주석) + `scripts/sync-distribution.sh` | 사본-원본 어긋남 방지 (paperthin: ssotize). 원본 수정 후 스크립트 1회 실행으로 동기화 |
+
+### G2 역할 경계 확정 (2026-08-24)
+
+| Decision | Rationale |
+|---|---|
+| "팀 확정 코치"를 새로 만들지 않음 — 하류 jcurve_ski `lv5-packaging-prompt-v2.md`가 그 역할 | v2는 부분 대화형(파일 도출=확인표 자동, 없는 것만 질문) 인터뷰로 agent-plan.md + CONTRACT.md(halt_at 포함)를 산출 — 우리 fixtures가 수작업하던 것과 동일. paperthin: 중복 스킬 금지 |
+| 3단 파이프라인 경계 확정: 선정(모더레이터, 부분 대화형) → 설계(와이어프레임, 완전 대화형) → 패키징(jcurve_ski, 부분 대화형) | 각 단계 산출물(@@STATE@@ → WFDATA/atf-data → CONTRACT/agent-plan)이 다음 단계의 입력 — 파일이 곧 기억 |
