@@ -1,0 +1,60 @@
+# Findings & Decisions
+
+> **기술적 발견, 중요한 결정이 있을 때마다 이 파일을 즉시 업데이트하세요.**
+
+## Requirements
+
+- md 5종 입력 → 스킬 1(Lv4 지도·워크시트·판정) → 스킬 2(와이어프레임 조정·스킬 추천)
+- 두 참조 저장소의 철학(파일=기억 / 절제)을 스킬 동작 원칙으로 내장
+
+## Research Findings
+
+### 참조 저장소 철학
+
+- **file-based-planning-workflow** (ahastudio): 파일 시스템을 AI의 영구 기억으로 사용.
+  발견·결정 즉시 기록, 에러 로그 필수, 5-Question Reboot Check로 세션 복구.
+- **paperthin** (LilMGenius): 스킬은 제거 연산 — 노이즈 제거, 스코프 확장 방지.
+  스킬 하나 = 실패 모드 하나. "어려운 건 기능 추가가 아니라 절제."
+
+### 디자인캠프 산출물 5종 스키마
+
+| 파일 | 작성 Agent | 스킬이 뽑아 쓰는 값 |
+|---|---|---|
+| 업무 Task Tree 정의서 | Agent 1 | Lv1~5 트리, 프로세스별 빈도·소요시간·산출물, Activity별 데이터소스·처리로직·HITL·선후행 |
+| Task Tree 통합본 | Agent 2-1 | 노드 수 검증, Pain Point 원본 |
+| PP·AX 매핑 정의서 | Agent 2-2 | PP 14건 유형·심각도·매핑 Activity, AX화 추천 Task, 우선순위 매트릭스 |
+| Process Flow 설계서 | Agent 3 | Lv6 분해, 분기·루프백 수, HITL 포인트, PP-Flow 교차 |
+| To-Be 종합보고서 | Agent 4 | ECRS 액션, To-Be Flow, 절감 시간 |
+
+### 레벨 명칭 불일치 (중요)
+
+- Agent 1: Lv4=프로세스, **Lv5=Activity** (25개)
+- Agent 3~4: Lv4=프로세스, **Lv5=Task, Lv6=Activity** (68개)
+- → 코치는 입력 파일의 "업무 Level 정의" 표를 먼저 읽고 그 파일의 명칭을 따르되,
+  대화에서는 ID 접두사(P-/T-/A-)와 이름으로 부른다. (기존 ATF의 "두 Lv 섞지 않기" 원칙 확장)
+
+## Technical Decisions
+
+| Decision | Rationale |
+|---|---|
+| 스킬을 2개로 나누고 역할을 선정/설계로 고정 | paperthin: 스킬 하나 = 실패 모드 하나 (잘못된 후보 선정 / 뭉뚱그린 판단 기준) |
+| 워크시트 기준을 5개(반복성·위임·다단계·순서가변·검증)로 하고 가치는 대화로만 | 5개는 md 파일에서 기계적으로 채울 수 있고, 가치(시간·감수)는 참가자 발화에서만 와야 함 (ATF G5 원칙 유지) |
+| 산출물 연결을 `@@STATE@@` 텍스트 블록으로 | file-based: 파일이 기억. HTML 내장 JSON보다 붙여넣기 재개가 쉬움. WireframeCoach v8의 `@@LV6@@` 압축 블록 패턴 계승 |
+| 스킬 2에서 에이전트 적합성 재판정 제거 | 스킬 1의 판정을 신뢰하고 중복 제거 (paperthin: ssotize) |
+| 짝 점검 게이트 제거 | 팀 모더레이션 상황(전원이 한 화면)에서는 불필요. 개인 세션용 v8 잔재 |
+| 판정·게이트 어휘를 ATF 그대로 유지 (권장 3종 / 충족 3종) | 검증된 계약. 새 등급 체계 발명 금지 (하지 말 것 목록 계승) |
+| HTML 워크시트는 자체완결(외부 CSS·JS 금지), 스킬 2 트리 HTML만 mermaid CDN 허용 | ATF 보고서 규칙 계승 / v8 산출물과의 호환 |
+| CDN 의존 명시: 스킬 2 HTML은 오프라인에서 트리가 안 보일 수 있음을 안내문에 포함 | 사내망 제약 가능성. 확인 불가 → 안내로 처리 (지어내지 않기) |
+
+## Issues Encountered
+
+| 문제 | 원인 | 해결 | 결과 |
+|---|---|---|---|
+| 디자인캠프 4·5 파일이 최초 요청에 없음 | 업로드 누락 | 3종으로 착수하되 사용자에게 표기 → 세션 중 4·5 추가 업로드됨 | 5종 전체 반영 |
+| 레벨 명칭이 파일 간 불일치 | Agent 1과 Agent 3의 Level 정의가 다름 | 입력 파일의 정의 표를 우선하는 규칙(CON-3) 추가 | 스킬 양쪽에 반영 |
+
+## Resources
+
+- https://github.com/ahastudio/file-based-planning-workflow (+ til/ai/file-based-planning-workflow.md)
+- https://github.com/LilMGenius/paperthin
+- 업로드: AgentTaskFit_v3.0.md, WireframeCoach_v8.md, 디자인캠프 1~5.txt

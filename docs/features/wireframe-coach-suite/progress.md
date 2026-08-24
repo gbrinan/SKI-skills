@@ -1,0 +1,56 @@
+# Progress Log
+
+> **각 단계를 완료하거나 문제가 발생하면 업데이트하세요.**
+
+## Session 2026-08-24
+
+### Phase 1: Requirements & Discovery ✅
+
+**작업 내역**:
+
+1. 사용자 요청 분석: 스킬 2개(모더레이터 코치 / 와이어프레임 코치), 입력=md 5종, 철학 2종 채택
+2. 기존 스킬 분석: AgentTaskFit_v3.0.md, WireframeCoach_v8.md
+3. 디자인캠프 산출물 5종 분석 (세션 중 4·5번 추가 업로드 반영)
+4. 참조 저장소 철학 조사 (ahastudio/file-based-planning-workflow, LilMGenius/paperthin)
+5. spec.md 작성
+
+### Phase 2: Planning & Structure ✅
+
+**작업 내역**:
+
+1. plan.md 작성 — 계승/폐기 요소 결정, `@@STATE@@` 연결 설계
+2. findings.md에 기술적 결정 8건, 이슈 2건 기록
+
+### Phase 3: Implementation ✅
+
+**작업 내역**:
+
+1. `skills/wireframe-moderator-coach.md` 작성 (v1.0) — Lv4 지도 → 5기준 워크시트 HTML → 6게이트 판정 → 상태 블록
+2. `skills/wireframe-coach.md` 작성 (v1.0) — 리부트 체크 → 판단기준 캐기 → 환경/방식 판정 → 스킬 2~3개 추천
+
+**생성/수정 파일**:
+
+- `skills/wireframe-moderator-coach.md` (새로 생성)
+- `skills/wireframe-coach.md` (새로 생성)
+- `docs/features/wireframe-coach-suite/` 6종 (새로 생성)
+
+### Phase 4: Testing ✅
+
+**작업 내역**:
+
+1. 산출물 계약 자체 검증: 프론트매터 2종, 판정/게이트 어휘 3종 고정, 상태 블록 필드 수(12/11) 일치, 스킬 1 출력의 `@@STATE@@`를 스킬 2가 그대로 읽는 왕복 확인
+2. 커밋 및 `claude/file-based-skill-design-74360t` 브랜치 푸시
+
+### Error Log
+
+| 에러 | 한 줄 요약 |
+|---|---|
+| 디자인캠프 4·5 최초 누락 | 세션 중 추가 업로드로 해소, 5종 전체 반영 |
+
+## 5-Question Reboot Check (다음 세션용)
+
+1. **현재 어느 단계인가?** Phase 4 완료 — 스킬 2개 v1.0 등록·푸시됨
+2. **다음에 할 일은?** 실제 워크샵 대화로 스킬 2개 리허설(coach-eval), 발견되는 문제를 findings.md에 기록 후 v1.1
+3. **목표는?** 디자인캠프 md 5종 → Lv5 선정 → 와이어프레임 → 스킬 추천까지 이어지는 코치 파이프라인
+4. **지금까지 배운 것은?** findings.md 참조 (레벨 명칭 불일치 대응, 상태 블록 연결, 계승/폐기 결정)
+5. **완료한 작업은?** 문서 6종 + 스킬 2종 작성, 커밋·푸시
