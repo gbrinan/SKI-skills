@@ -94,3 +94,10 @@
 | 와이어프레임 코치 v1.1: ④에 추천 스킬별 `WFDATA` md 코드블록 추가 | 동일 — 팀 공유 폴더에 저장하면 adapt_upstream.py가 바로 읽음 (검증 통과한 스키마 그대로) |
 | 커스텀 파라미터 규칙 명문화: `(미정)`=모름 vs `{N일}`=일부러 열어둠 | 리허설 발견 사항 반영 — 스킬 인풋 항목으로 넘김 |
 | "우선" 배지는 추천 1에만 | Sonnet 5 비교에서 발견된 해석 차이 봉합 |
+
+### 배포 구조 결정 (2026-08-24)
+
+| Decision | Rationale |
+|---|---|
+| 3중 배포 구조: `skills/`(SSOT) → `.claude/skills/*/SKILL.md`(Claude Code 자동 인식) + `distribution/innohub/`(한글 파일명 등록용) | md는 실행 파일이 아니라 프롬프트 명세 — 플랫폼별 인식 위치가 다름. 파일명은 동작과 무관(정체성은 프론트매터+본문) |
+| 배포 사본 상단에 SSOT 주석(YAML 주석) + `scripts/sync-distribution.sh` | 사본-원본 어긋남 방지 (paperthin: ssotize). 원본 수정 후 스크립트 1회 실행으로 동기화 |
