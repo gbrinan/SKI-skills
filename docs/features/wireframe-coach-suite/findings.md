@@ -58,3 +58,10 @@
 - https://github.com/ahastudio/file-based-planning-workflow (+ til/ai/file-based-planning-workflow.md)
 - https://github.com/LilMGenius/paperthin
 - 업로드: AgentTaskFit_v3.0.md, WireframeCoach_v8.md, 디자인캠프 1~5.txt
+
+### 추가 결정 (2026-08-24, 2차)
+
+| Decision | Rationale |
+|---|---|
+| 스킬 1 시각화를 평면 워크시트 → Lv4>Lv5>Lv6 신호등 트리(v1.1)로 교체 | 사용자 요구: 전체 계층을 보며 부적합 항목이 회색 취소선으로 지워지는 "보여주기 전용" 화면. 🟢(5기준 전부 ✅)/🟡(❓만)/🔴(❌ 있음) 3색, 🔴·제외 항목은 회색 처리하되 사유와 함께 남김 |
+| 회색 처리에도 사유를 반드시 남김 | paperthin의 빼기 + "지우지 않고 근거를 남긴다"(file-based) — 팀이 되살릴 수 있어야 함 |
