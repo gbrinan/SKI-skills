@@ -20,8 +20,8 @@
 
 ```
 {hr|strategy|sales|ops}/
-├── atf/          # 모더레이터 코치 산출 — atf-data JSON 내장 판정 HTML
-├── wireframe/    # 와이어프레임 코치 산출 — WFDATA JSON 내장 md (추천 스킬당 1개)
+├── atf/          # 디자인 캠프 해설 코치 산출 — atf-data JSON 내장 판정 HTML
+├── wireframe/    # 에이전트, 스킬 설계 코치 산출 — WFDATA JSON 내장 md (추천 스킬당 1개)
 └── pack/         # 어댑터가 생성 + 팀 확정 반영된 팀 스킬팩 (CONTRACT·agent-plan·AGENTS·skills/)
 fixtures_*.py     # 팀 확정 재현 스크립트 (E2E 재실행용)
 ```
@@ -35,7 +35,7 @@ python3 <이 폴더>/fixtures_hr.py /tmp/hr-pack           # 팀 확정 반영
 python3 check/check_contract.py /tmp/hr-pack --run-check # GREEN → L1~L4 전체 통과
 ```
 
-## @@STATE@@ (도메인별 — 와이어프레임 코치 이어받기용)
+## @@STATE@@ (도메인별 — 에이전트, 스킬 설계 코치 이어받기용)
 
 ```
 @@STATE@@
