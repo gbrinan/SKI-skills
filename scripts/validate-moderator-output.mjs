@@ -112,7 +112,7 @@ if (errors.length) {
 console.log(`검증 통과: 6개 페이지, LV4 ${data.lv4s.length}개, LV5 ${[...new Set(data.lv4s.flatMap(item => item.lv5s.map(lv5 => lv5.id)))].length}개, LV6 ${[...new Set(data.lv4s.flatMap(item => item.lv5s.flatMap(lv5 => lv5.lv6s.map(lv6 => lv6.id))))].length}개`);
 
 function attributeValue(attributes, name) {
-  const pattern = new RegExp(`(?:^|\\s)${name}\\s*=\\s*(?:"([^"]*)"|'([^']*)'|([^\\s"'=<>]+))`, 'i');
+  const pattern = new RegExp(`(?:^|[\\s/])${name}\\s*=\\s*(?:"([^"]*)"|'([^']*)'|([^\\s"'=<>]+))`, 'i');
   const match = attributes.match(pattern);
   const value = match ? (match[1] ?? match[2] ?? match[3]) : undefined;
   return value?.replace(/&#(?:x([0-9a-f]+)|([0-9]+));?/gi, (_, hex, decimal) => (
@@ -143,7 +143,7 @@ function jsonBlocks(source, id) {
     const start = lower.indexOf('<script', cursor);
     if (start === -1) break;
     const boundary = lower[start + 7];
-    if (boundary && !/[\s>]/.test(boundary)) {
+    if (boundary && !/[\s/>]/.test(boundary)) {
       cursor = start + 7;
       continue;
     }

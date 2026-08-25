@@ -149,6 +149,14 @@ try {
   await writeFile(malformedCloseHtml, finalSource.replace('</script>', '</scripture>'), 'utf8');
   expect(run(validator, malformedCloseHtml).status !== 0, '잘못된 script 닫는 태그가 validator를 통과함');
 
+  const solidusDuplicateHtml = join(temp, 'solidus-duplicate.html');
+  await writeFile(solidusDuplicateHtml, finalSource.replace('<body>', '<body><script/id="moderator-data" type="application/json">{}</script>'), 'utf8');
+  expect(run(validator, solidusDuplicateHtml).status !== 0, 'solidus 뒤 중복 moderator-data가 validator를 통과함');
+
+  const solidusAtfHtml = join(temp, 'solidus-atf.html');
+  await writeFile(solidusAtfHtml, finalSource.replace('</body>', '<script/ id="atf-data" type="application/json">{}</script></body>'), 'utf8');
+  expect(run(validator, solidusAtfHtml).status !== 0, 'solidus 뒤 중복 atf-data가 validator를 통과함');
+
   const hostileCount = structuredClone(data);
   hostileCount.lv4s[0].lv5s[0].painPoints.count = '</span><img src=x onerror=alert(1)>';
   const hostileCountJson = join(temp, 'hostile-count.json');
