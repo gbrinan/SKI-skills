@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import { readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
+import { isDeepStrictEqual } from 'node:util';
 import { validateAtfData, validateModeratorData } from './moderator-schema.mjs';
 
 const [, , htmlArg] = process.argv;
@@ -11,8 +12,9 @@ if (!htmlArg) {
 
 const html = await readFile(resolve(process.cwd(), htmlArg), 'utf8');
 const errors = [];
-const moderatorMatch = html.match(/<script id="moderator-data" type="application\/json">([\s\S]*?)<\/script>/);
-if (!moderatorMatch) errors.push('moderator-data 블록이 없습니다.');
+const moderatorMatches = [...html.matchAll(/<script id="moderator-data" type="application\/json">([\s\S]*?)<\/script>/g)];
+if (moderatorMatches.length !== 1) errors.push(`moderator-data 블록은 정확히 1개여야 합니다: ${moderatorMatches.length}개`);
+const moderatorMatch = moderatorMatches[0];
 
 let data;
 if (moderatorMatch) {
@@ -28,6 +30,10 @@ if (moderatorMatch) {
 const requiredPages = ['intro', 'overview', 'lv4', 'lv5', 'lv6', 'final'];
 for (const page of requiredPages) {
   if (!html.includes(`data-page-panel="${page}"`)) errors.push(`필수 페이지 누락: ${page}`);
+  if (!html.includes(`id="page-${page}"`)) errors.push(`필수 페이지 패널 ID 누락: page-${page}`);
+  if (!html.includes(`id="tab-${page}"`)) errors.push(`필수 페이지 탭 ID 누락: tab-${page}`);
+  if (!html.includes(`aria-controls="page-${page}"`)) errors.push(`탭-패널 연결 누락: ${page}`);
+  if (!html.includes(`aria-labelledby="tab-${page}"`)) errors.push(`패널-탭 연결 누락: ${page}`);
 }
 
 if (data) {
@@ -46,14 +52,16 @@ if (data) {
       }
     }
   }
-  const atfMatch = html.match(/<script id="atf-data" type="application\/json">([\s\S]*?)<\/script>/);
+  const atfMatches = [...html.matchAll(/<script id="atf-data" type="application\/json">([\s\S]*?)<\/script>/g)];
+  if (atfMatches.length > 1) errors.push(`atf-data 블록은 최대 1개여야 합니다: ${atfMatches.length}개`);
+  const atfMatch = atfMatches[0];
   if (data.selection?.finalized && !atfMatch) errors.push('판정 완료 HTML에 atf-data가 없습니다.');
   if (!data.selection?.finalized && atfMatch) errors.push('판정 전 HTML에 atf-data가 있습니다.');
   if (atfMatch) {
     try {
       const atf = JSON.parse(atfMatch[1]);
       validateAtfData(atf);
-      if (atf.verdict !== data.selection.verdict) errors.push('atf-data 판정과 화면 판정이 다릅니다.');
+      if (!isDeepStrictEqual(atf, data.atfData)) errors.push('atf-data와 moderator-data의 ATF 값이 다릅니다.');
     } catch (error) { errors.push(`atf-data JSON 오류: ${error.message}`); }
   }
 }
@@ -65,7 +73,7 @@ const visible = html
   .replace(/\s+/g, ' ');
 const forbidden = [
   [/\bPP\b/i, 'PP'], [/\bHITL\b/i, 'HITL'], [/\bAX\b/i, 'AX'],
-  [/\bSTEP\b/i, 'STEP'], [/\bLEVEL\b/i, 'LEVEL'], [/\bGate\b/i, 'Gate'], [/\bLoopback\b/i, 'Loopback'],
+  [/\bSTEP\b/i, 'STEP'], [/\bLEVEL\b/i, 'LEVEL'], [/\bGate\b(?!\s*\()/i, 'Gate'], [/\bLoopback\b(?!\s*\()/i, 'Loopback'],
 ];
 for (const [pattern, label] of forbidden) {
   if (pattern.test(visible)) errors.push(`화면에 설명 없는 약어·개념이 있습니다: ${label}`);

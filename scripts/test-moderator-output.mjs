@@ -91,6 +91,40 @@ try {
     expect(run(validator, editedHtml).status !== 0, `수동 편집된 ${name} 데이터가 validator를 통과함`);
   }
 
+  const semanticTarget = value => {
+    value.targetTask = { no: 999, name: '다른 업무' };
+  };
+  const targetMismatchHtml = join(temp, 'target-mismatch.html');
+  let targetMismatchSource = editJsonBlock(finalSource, 'moderator-data', value => semanticTarget(value.atfData));
+  targetMismatchSource = editJsonBlock(targetMismatchSource, 'atf-data', semanticTarget);
+  await writeFile(targetMismatchHtml, targetMismatchSource, 'utf8');
+  expect(run(validator, targetMismatchHtml).status !== 0, '선정 LV5와 다른 ATF 대상이 validator를 통과함');
+
+  const semanticEngine = value => {
+    value.engines[0] = { no: 999, name: '다른 세부 업무', human: '자동', engine: '자동화' };
+  };
+  const engineMismatchHtml = join(temp, 'engine-mismatch.html');
+  let engineMismatchSource = editJsonBlock(finalSource, 'moderator-data', value => semanticEngine(value.atfData));
+  engineMismatchSource = editJsonBlock(engineMismatchSource, 'atf-data', semanticEngine);
+  await writeFile(engineMismatchHtml, engineMismatchSource, 'utf8');
+  expect(run(validator, engineMismatchHtml).status !== 0, 'LV6와 다른 ATF 엔진이 validator를 통과함');
+
+  const splitBrainHtml = join(temp, 'split-brain.html');
+  await writeFile(splitBrainHtml, editJsonBlock(finalSource, 'atf-data', semanticTarget), 'utf8');
+  expect(run(validator, splitBrainHtml).status !== 0, '서로 다른 moderator-data와 atf-data가 validator를 통과함');
+
+  const brokenPanelHtml = join(temp, 'broken-panel.html');
+  await writeFile(brokenPanelHtml, finalSource.replace('id="page-lv4"', 'id="page-lv4-broken"'), 'utf8');
+  expect(run(validator, brokenPanelHtml).status !== 0, '필수 페이지 패널 ID 누락이 validator를 통과함');
+
+  const duplicateDataHtml = join(temp, 'duplicate-data.html');
+  await writeFile(duplicateDataHtml, finalSource.replace('</body>', '<script id="moderator-data" type="application/json">{}</script></body>'), 'utf8');
+  expect(run(validator, duplicateDataHtml).status !== 0, '중복 moderator-data 블록이 validator를 통과함');
+
+  const duplicateAtfHtml = join(temp, 'duplicate-atf.html');
+  await writeFile(duplicateAtfHtml, finalSource.replace('</body>', '<script id="atf-data" type="application/json">{}</script></body>'), 'utf8');
+  expect(run(validator, duplicateAtfHtml).status !== 0, '중복 atf-data 블록이 validator를 통과함');
+
   const hostileCount = structuredClone(data);
   hostileCount.lv4s[0].lv5s[0].painPoints.count = '</span><img src=x onerror=alert(1)>';
   const hostileCountJson = join(temp, 'hostile-count.json');
@@ -120,8 +154,12 @@ try {
   expect(run(validator, humanOnlyHtml).status !== 0, '사람 업무만 있는 후보가 검증을 통과함');
 
   const acronymHtml = join(temp, 'bare-acronym.html');
-  await writeFile(acronymHtml, finalSource.replace('업무 후보 선정 · 팀 토의용', 'PP'), 'utf8');
+  await writeFile(acronymHtml, finalSource.replace('</body>', '<p>PP</p></body>'), 'utf8');
   expect(run(validator, acronymHtml).status !== 0, '설명 없는 약어가 검증을 통과함');
+
+  const explainedTermHtml = join(temp, 'explained-term.html');
+  await writeFile(explainedTermHtml, finalSource.replace('</body>', '<p>Gate(판정 기준)</p></body>'), 'utf8');
+  expect(run(validator, explainedTermHtml).status === 0, '뜻을 설명한 전문어가 거부됨');
 
   console.log(`테스트 통과: ${passed}개 계약 검증 (오류·공격성 fixture 포함)`);
 } finally {

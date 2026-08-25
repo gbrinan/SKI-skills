@@ -6,6 +6,13 @@ const HUMAN_VALUES = ['자동', '증강', '사람고유'];
 const ENGINE_VALUES = ['자동화', '스킬', '사람'];
 const WRAP_VALUES = ['개인용', '여러사람_미니앱', '여러사람_공유만'];
 const GATE_VALUES = ['충족', '미충족', '미확인'];
+const ROLE_ATF_VALUES = {
+  ai: ['자동', '스킬'],
+  assisted: ['증강', '스킬'],
+  human_input: ['사람고유', '사람'],
+  integration: ['증강', '사람'],
+  human_final: ['사람고유', '사람'],
+};
 
 function fail(message) {
   throw new Error(`입력 데이터 오류: ${message}`);
@@ -125,4 +132,25 @@ export function validateModeratorData(value) {
   if (value.atfData.verdict !== value.selection.verdict) {
     fail('selection.verdict와 atfData.verdict가 다릅니다.');
   }
+  const selected = value.lv4s
+    .flatMap(lv4 => lv4.lv5s.map(lv5 => ({ lv4, lv5 })))
+    .find(item => item.lv5.id === value.selection.selectedLv5Id);
+  const expectedProcess = `${selected.lv4.name} › ${selected.lv5.name}`;
+  if (value.atfData.process !== expectedProcess) fail('atfData.process가 선택한 LV4·LV5와 다릅니다.');
+  if (value.atfData.targetTask.no !== 1 || value.atfData.targetTask.name !== selected.lv5.name) {
+    fail('atfData.targetTask가 선택한 LV5와 다릅니다.');
+  }
+  if (value.atfData.engines.length !== selected.lv5.lv6s.length) {
+    fail('atfData.engines 수가 선택한 LV5의 LV6 수와 다릅니다.');
+  }
+  selected.lv5.lv6s.forEach((lv6, index) => {
+    const engine = value.atfData.engines[index];
+    const [human, engineType] = ROLE_ATF_VALUES[lv6.role];
+    if (
+      engine.no !== index + 1
+      || engine.name !== lv6.name
+      || engine.human !== human
+      || engine.engine !== engineType
+    ) fail(`atfData.engines[${index}]가 LV6 순서·역할과 다릅니다.`);
+  });
 }
