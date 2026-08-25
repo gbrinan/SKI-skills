@@ -1,0 +1,4 @@
+interface:
+  display_name: "기업교육 강의안 제작"
+  short_description: "기업교육 강의안을 학습 흐름과 실습 중심으로 설계·검수"
+  default_prompt: "Use $build-corporate-training-decks to turn the provided material into a practical training deck with activities and speaker notes."
