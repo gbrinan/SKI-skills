@@ -1,4 +1,4 @@
-# Implementation Plan: 와이어프레임 코치 스위트
+# Implementation Plan: 에이전트, 스킬 설계 코치 스위트
 
 ## Summary
 

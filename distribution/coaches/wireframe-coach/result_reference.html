@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>To-Be 와이어프레임 — 계정별 잔액 확인</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>:root{--brand:#3346FF;--brand-soft:#EEF0FF;--brand-line:#D5DAFF;--navy:#222A45;
+ --ink:#1F2937;--sub:#6B7280;--faint:#9AA3B8;--line:#E3E7EF;--paper:#fff;--bg:#F4F5F8;
+ --barh:52px;--red-soft:#FCEAED}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+ font:14px/1.6 "Malgun Gothic","Apple SD Gothic Neo",sans-serif;word-break:keep-all;
+ padding-bottom:var(--barh)}
+.wrap{width:min(1140px,calc(100% - 36px));margin:0 auto}
+header{background:var(--navy);color:#fff;padding:24px 0 20px}
+.eyebrow{font-size:11px;font-weight:800;letter-spacing:.14em;color:#AEB9FF;margin:0 0 7px}
+header h1{margin:0;font-size:22px;line-height:1.3}
+header h1 .lv{display:inline-block;font-size:11px;font-weight:800;background:rgba(255,255,255,.14);
+ border-radius:6px;padding:3px 9px;vertical-align:3px;margin-right:8px}
+header .meta{margin-top:8px;font-size:12.5px;color:#C6CCE2}
+header .meta b{color:#fff}
+.steps{background:var(--paper);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:40}
+.steps-in{display:flex;gap:6px;padding:10px 0}
+.st{flex:1;display:flex;flex-direction:column;gap:1px;background:var(--paper);
+ border:1.5px solid var(--line);border-radius:9px;padding:8px 13px;cursor:pointer;
+ font:inherit;text-align:left;transition:.14s}
+.st .k{font-size:10px;letter-spacing:.1em;font-weight:800;color:var(--faint)}
+.st .t{font-size:13.5px;font-weight:700;color:var(--navy)}
+.st:hover{border-color:var(--brand-line);background:var(--brand-soft)}
+.st.on{background:var(--brand);border-color:var(--brand)}
+.st.on .k{color:#C6CCFF}.st.on .t{color:#fff}
+.st.done{background:var(--brand-soft);border-color:var(--brand-line)}
+main{padding:20px 0 28px}
+.page{display:none}.page.on{display:block;animation:rise .22s ease}
+@keyframes rise{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@media(prefers-reduced-motion:reduce){.page.on{animation:none}}
+.panel{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:18px 20px}
+.cap{font-size:11px;font-weight:800;letter-spacing:.1em;color:var(--sub);margin:0 0 12px}
+.cap em{font-style:normal;font-weight:600;letter-spacing:0;color:var(--faint)}
+#svgbox{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:12.5px;background:#fff}
+th,td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top;line-height:1.55}
+th{background:#F9FAFC;color:var(--navy);font-weight:800;font-size:11px;white-space:nowrap}
+td:first-child{font-weight:700;color:var(--navy)}
+.tblwrap{overflow-x:auto}.tblwrap table{min-width:680px}
+.sk{border-left:4px solid var(--brand);background:var(--brand-soft);border-radius:8px;
+ padding:13px 16px;margin-bottom:10px;font-size:13.5px}
+.sk b{color:var(--brand)}
+pre{margin:0;font-family:ui-monospace,Consolas,monospace;font-size:11.5px;line-height:1.7;
+ white-space:pre-wrap;word-break:break-all;background:#FBFCFE;border:1px solid var(--line);
+ border-radius:8px;padding:13px 15px}
+.cp{float:right;font-size:11.5px;font-weight:800;border:none;background:var(--brand);color:#fff;
+ border-radius:6px;padding:5px 12px;cursor:pointer}
+.note{background:var(--brand-soft);border-left:4px solid var(--brand);border-radius:0 8px 8px 0;
+ padding:11px 15px;font-size:13px;margin-top:12px}
+.note b{color:var(--brand)}
+.bar{position:fixed;left:0;right:0;bottom:0;height:var(--barh);background:var(--paper);
+ border-top:1px solid var(--line);display:grid;grid-template-columns:1fr auto 1fr;
+ align-items:center;gap:12px;padding:0 18px;z-index:50}
+.hint{font-size:12px;color:var(--sub)}.hint b{color:var(--navy)}
+.dots{display:flex;gap:9px;justify-self:center}
+.dot{width:9px;height:9px;border-radius:50%;border:0;padding:0;cursor:pointer;
+ background:var(--line);transition:.14s;position:relative}
+.dot:hover{background:var(--faint);transform:scale(1.25)}
+.dot.on{background:var(--brand);transform:scale(1.35)}
+.dot::after{content:attr(data-label);position:absolute;bottom:19px;left:50%;
+ transform:translateX(-50%);white-space:nowrap;background:var(--navy);color:#fff;
+ padding:4px 9px;border-radius:6px;font-size:11.5px;font-weight:700;opacity:0;
+ pointer-events:none;transition:.12s}
+.dot:hover::after{opacity:1}
+.pager{justify-self:end;font-size:13px;color:var(--sub);font-variant-numeric:tabular-nums}
+.pager b{color:var(--brand)}
+.fnote{margin-top:12px;color:var(--sub);font-size:11.5px;line-height:1.8}
+@media(max-width:760px){.steps-in{flex-wrap:wrap}.st{flex:1 1 45%}
+ .dots{display:none}.bar{grid-template-columns:1fr auto}}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+<p class="eyebrow">에이전트, 스킬 설계 코치 · TO-BE 와이어프레임</p>
+<h1><span class="lv">Lv.5 액티비티</span>계정별 잔액 확인</h1>
+<div class="meta">재무본부 회계관리팀 · 상위 <b>Lv.4 프로세스</b> 분기/반기 결산 · 2026-08-26 · 본선 노드 <b>7개</b> · 사람 <b>7 → 2</b></div>
+</div></header>
+<nav class="steps"><div class="wrap"><div class="steps-in">
+<button class="st on" data-p="1"><span class="k">STEP 1</span><span class="t">설계도</span></button>
+<button class="st" data-p="2"><span class="k">STEP 2</span><span class="t">노드 상세</span></button>
+<button class="st" data-p="3"><span class="k">STEP 3</span><span class="t">만들 스킬 3개</span></button>
+<button class="st" data-p="4"><span class="k">STEP 4</span><span class="t">다음 시간에 쓸 블록</span></button>
+</div></div></nav>
+<main class="wrap">
+<section class="page on" id="p1"><div class="panel">
+<p class="cap">TO-BE 설계도 <em>— AI가 맡는 일과 사람이 결정하는 일을 나눴습니다. 점선은 예외·미개통 경로입니다.</em></p>
+<div id="svgbox">
+<pre class="mermaid">
+flowchart LR
+  N1["📥 잔액·계열사 파일 수집"]:::mcpread --> N2["🧠 표준 잔액표 생성"]:::codex
+  N2 --> N3["🧠 전기 대비 변화 계산"]:::codex
+  N3 --> N4{"🧠 이상 잔액 판정 (±10% 기준)"}:::codex
+  N4 --> N5["👤 이상 원인 확인·판단"]:::human
+  N5 --> N6["📤 검토 브리핑 초안 저장"]:::mcpwrite
+  N6 --> N7["👤 최종 검토·팀 공유"]:::human
+  N1 -.-> E1["📤 누락 계열사 재요청 초안"]:::mcpwrite
+  E1 -.-> E2["👤 재요청 발송"]:::human
+  S1["🚧 SAP 원장 직접 연동"]:::api -.-> N1
+  classDef codex fill:#EDEFFF,stroke:#3346FF,color:#222A45;
+  classDef mcpread fill:#E4F6E9,stroke:#157A3C,color:#222A45;
+  classDef mcpwrite fill:#FFF4D6,stroke:#9A6B00,color:#222A45;
+  classDef api fill:#F0F1F4,stroke:#8a90a5,color:#6a7090,stroke-dasharray:4 3;
+  classDef human fill:#FBE3E3,stroke:#B02B2B,color:#222A45;
+</pre>
+<div class="note">사내망에서 트리가 안 보이면 아래 표로 확인하세요.</div>
+</div>
+<div class="note"><b>발송·공유 앞에는 반드시 사람이 섭니다.</b> 브리핑과 메일은 초안까지 AI가 만들고, 확정·발송은 결산담당이 합니다. 그림이 안 보이면 STEP 2의 표로 확인하세요.</div>
+</div></section>
+<section class="page" id="p2"><div class="panel">
+<p class="cap">노드 상세 <em>— "만약 ~면 ~한다"로 적힌 판단 기준이 다음 시간 스킬의 판정 규칙이 됩니다.</em></p>
+<div class="tblwrap">
+<table>
+<tr><th>노드</th><th>환경</th><th>방식</th><th>판단 기준</th><th>예외</th></tr>
+<tr><td>1. 잔액·계열사 파일 수집</td><td>📥 회사 자료 읽기</td><td>스킬</td><td>공유폴더의 원장잔액_{분기}.xlsx와 계열사잔액_*.xlsx를 모두 읽는다</td><td>계열사 파일 누락 시 재요청 초안 작성(발송은 사람)</td></tr>
+<tr><td>2. 표준 잔액표 생성</td><td>🧠 이노허브</td><td>스킬</td><td>계정코드 기준으로 원장·계열사 잔액을 한 표로 병합한다</td><td>계정코드 불일치 시 미매칭 목록으로 분리</td></tr>
+<tr><td>3. 전기 대비 변화 계산</td><td>🧠 이노허브</td><td>스킬</td><td>계정별 (당기-전기)/전기 증감률을 계산한다</td><td>전기 값 0이면 증감률 대신 '신규' 표기</td></tr>
+<tr><td>4. 이상 잔액 판정</td><td>🧠 이노허브</td><td>스킬</td><td>만약 증감률이 ±10% 초과이거나 부호가 반전되면 이상 후보로 표시한다</td><td>판정 애매(±10% 경계)면 후보에 넣고 사람 확인으로 넘긴다</td></tr>
+<tr><td>5. 이상 원인 확인·판단</td><td>👤 사람</td><td>사람</td><td>결산담당이 이상 후보의 원인을 확인하고 확정/해제한다</td><td>원인 불명이면 계열사 담당에 질의</td></tr>
+<tr><td>6. 검토 브리핑 초안 저장</td><td>📤 회사 도구에 저장</td><td>스킬</td><td>확정 결과를 표+요약 3줄로 개인 OneDrive에 저장, 팀장 앞 메일 초안 생성(발송하지 않음)</td><td>저장 실패 시 채팅으로 본문 출력</td></tr>
+<tr><td>7. 최종 검토·팀 공유</td><td>👤 사람</td><td>사람</td><td>결산담당이 초안을 검토 후 직접 발송·공유한다</td><td>-</td></tr>
+<tr><td>(참고) SAP 원장 직접 연동</td><td>🚧 연결 준비 중</td><td>-</td><td>-</td><td>오늘 실행 불가 - 사람이 SAP에서 엑셀 추출해 공유폴더에 둔다</td></tr>
+</table>
+</div>
+</div></section>
+<section class="page" id="p3"><div class="panel">
+<p class="cap">만들 스킬 3개 <em>— 다음 시간에 이 순서대로 하나씩 만듭니다. 담당은 조에서 나눕니다.</em></p>
+
+<div class="sk"><b>추천 1. 잔액표준화기 (balance-normalizer)</b> (우선) - 원장·계열사 잔액 엑셀을 받아 계정코드 기준 표준 잔액표를 만드는 스킬. 근거: PP-6(수신 지연·품질 편차)의 취합 부담 직접 해소, 오늘 환경(📥+🧠)에서 바로 실행 가능. [노드 1~2]</div>
+<div class="sk"><b>추천 2. 이상잔액플래거 (anomaly-flagger)</b> - 표준 잔액표를 받아 ±10% 기준 이상 후보 목록을 만드는 스킬. 근거: 이상치 식별의 기준 명문화(속인화 방지), 사람 판단은 확정만. [노드 3~4]</div>
+<div class="sk"><b>추천 3. 잔액브리핑초안기 (balance-briefing-drafter)</b> - 확정 결과를 받아 검토 브리핑과 팀장 앞 메일 초안을 만드는 스킬. 근거: 보고 반복 부담(PP-8 유사) 절감, 발송 앞 사람 확인 구조. [노드 6]</div>
+
+<div class="note">스킬이 3개인데 조가 5명이면 — 두 명이 스킬 하나를 함께 맡되, <b>제작은 1인 1스킬</b>(각자 자기 버전)입니다.</div>
+</div></section>
+<section class="page" id="p4"><div class="panel">
+<p class="cap"><button class="cp" onclick="copyState()">📋 복사</button>다음 시간에 쓸 정리 블록 <em>— 제작 세션에서 그대로 붙여넣으면 이어서 진행됩니다.</em></p>
+
+<pre id="state">
+@@STATE@@
+단계: 와이어프레임완료
+담당: 결산담당
+Lv5: [Lv.5 액티비티] 계정별 잔액 확인
+판정(선정단계): 권장
+노드: 잔액·계열사 파일 수집[📥] → 표준 잔액표 생성[🧠] → 전기 대비 변화 계산[🧠] → 이상 잔액 판정[🧠] → 이상 원인 확인·판단[👤] → 검토 브리핑 초안 저장[📤] → 최종 검토·팀 공유[👤]
+휴먼: 이상 원인 확정 · 재요청 발송 · 최종 검토·공유
+예외: 계열사 파일 누락(재요청 초안) / 계정코드 미매칭(별도 목록) / 경계값 애매(사람 확인)
+판단기준: 만약 증감률 ±10% 초과 또는 부호 반전이면 이상 후보로 표시한다 / 전기 0이면 신규 표기 / 발송·공유는 사람만 한다
+추천스킬: 1.잔액표준화기(잔액 엑셀→표준 잔액표) 2.이상잔액플래거(표준 잔액표→이상 후보 목록) 3.잔액브리핑초안기(확정 결과→브리핑·메일 초안)
+참가자결정: -
+다음할일: 제작 세션에서 추천스킬 1부터 작성
+@@END@@
+</pre>
+
+<p id="cpmsg" style="margin-top:10px;font-size:13px;color:var(--sub)"></p>
+</div>
+<div class="fnote">※ 이 설계는 교육 과정의 참고용입니다. 실제 적용 여부·범위의 최종 결정과 책임은 팀과 조직에 있습니다.</div>
+</section>
+</main>
+<div class="bar">
+<div class="hint">← → 이동 · 숫자키 점프</div>
+<nav class="dots" id="dots"></nav>
+<div class="pager"><b id="cur">1</b> / <span id="total">4</span></div>
+</div>
+<script>(function(){
+  var TITLES=["설계도","노드 상세","만들 스킬 3개","다음 시간에 쓸 블록"];
+  var sts=[].slice.call(document.querySelectorAll(".st"));
+  var pages=[].slice.call(document.querySelectorAll(".page"));
+  var dots=document.getElementById("dots");
+  TITLES.forEach(function(t,i){
+    var d=document.createElement("button"); d.className="dot";
+    d.setAttribute("data-label",(i+1)+". "+t);
+    d.onclick=function(){go(i+1)}; dots.appendChild(d);
+  });
+  var dEls=[].slice.call(dots.children), cur=1;
+  function go(n){
+    n=Math.max(1,Math.min(4,n));
+    sts.forEach(function(s){s.classList.toggle("on",+s.dataset.p===n);
+      s.classList.toggle("done",+s.dataset.p<n)});
+    pages.forEach(function(p){p.classList.toggle("on",p.id==="p"+n)});
+    dEls.forEach(function(d,i){d.classList.toggle("on",i===n-1)});
+    document.getElementById("cur").textContent=n;
+    if(location.hash!=="#s"+n) history.replaceState(null,"","#s"+n);
+    window.scrollTo({top:0,behavior:"smooth"}); cur=n;
+  }
+  sts.forEach(function(s){s.onclick=function(){go(+s.dataset.p)}});
+  addEventListener("keydown",function(e){
+    if(e.key==="ArrowRight")go(cur+1); if(e.key==="ArrowLeft")go(cur-1);
+    if(/^[1-4]$/.test(e.key))go(+e.key);
+  });
+  window.copyState=function(){
+    var t=document.getElementById("state").textContent;
+    var msg=document.getElementById("cpmsg");
+    var ta=document.createElement("textarea"); ta.value=t;
+    document.body.appendChild(ta); ta.select();
+    try{document.execCommand("copy");
+      msg.textContent="복사했습니다. 제작 세션 채팅에 붙여넣으세요.";}
+    catch(e){msg.textContent="복사가 막혔습니다. 블록을 직접 선택해 복사해 주세요.";}
+    ta.remove();
+  };
+  var h=parseInt((location.hash.match(/^#s(\d)$/)||[])[1],10);
+  go(h||1);
+})();
+mermaid.initialize({startOnLoad:true, theme:"neutral"});
+</script>
+</body>
+</html>
