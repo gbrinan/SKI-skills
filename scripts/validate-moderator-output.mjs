@@ -44,9 +44,6 @@ if (data) {
     for (const lv5 of lv4.lv5s) {
       if (lv5Ids.has(lv5.id)) errors.push(`중복 LV5 ID: ${lv5.id}`);
       lv5Ids.add(lv5.id);
-      const machineScope = lv5.lv6s.filter(task => ['ai', 'assisted'].includes(task.role)).length;
-      if (lv5.eligible && machineScope < 2) errors.push(`${lv5.id}: AI 처리·보조가 2개 미만인데 후보로 표시되었습니다.`);
-      if (lv5.lv6s.length < 3 && lv5.eligible) errors.push(`${lv5.id}: 세부 업무가 3개 미만인데 후보로 표시되었습니다.`);
       for (const lv6 of lv5.lv6s) {
         if (lv6Ids.has(lv6.id)) errors.push(`중복 LV6 ID: ${lv6.id}`);
         lv6Ids.add(lv6.id);
@@ -68,10 +65,10 @@ if (data) {
   }
 }
 
-const visible = html
+const visible = decodeNumericEntities(html
   .replace(/<script(?=[\s/>])[\s\S]*?<\/script\s*>/gi, ' ')
   .replace(/<style(?=[\s/>])[\s\S]*?<\/style\s*>/gi, ' ')
-  .replace(/<[^>]+>/g, ' ')
+  .replace(/<[^>]+>/g, ' '))
   .replace(/\s+/g, ' ');
 const forbidden = [
   [/\bPP\b/i, 'PP'], [/\bHITL\b/i, 'HITL'], [/\bAX\b/i, 'AX'],
@@ -88,7 +85,7 @@ if (data) {
     ...(data.lv4s ?? []).flatMap(lv4 => [
       lv4.name, lv4.lv3, lv4.frequency,
       ...(lv4.lv5s ?? []).flatMap(lv5 => [
-        lv5.name, lv5.evidence, lv5.painPoints?.severity,
+        lv5.name, lv5.evidence, lv5.painPoints?.severity, lv5.candidateOverrideReason,
         ...(lv5.lv6s ?? []).flatMap(lv6 => [lv6.name, lv6.reason]),
       ]),
     ]),
@@ -115,9 +112,15 @@ function attributeValue(attributes, name) {
   const pattern = new RegExp(`(?:^|[\\s/])${name}\\s*=\\s*(?:"([^"]*)"|'([^']*)'|([^\\s"'=<>]+))`, 'i');
   const match = attributes.match(pattern);
   const value = match ? (match[1] ?? match[2] ?? match[3]) : undefined;
-  return value?.replace(/&#(?:x([0-9a-f]+)|([0-9]+));?/gi, (_, hex, decimal) => {
+  return value === undefined ? undefined : decodeNumericEntities(value);
+}
+
+function decodeNumericEntities(value) {
+  return value.replace(/&#(?:x([0-9a-f]+)|([0-9]+));?/gi, (_, hex, decimal) => {
     const point = Number.parseInt(hex ?? decimal, hex ? 16 : 10);
-    return point <= 0x10ffff ? String.fromCodePoint(point) : '\ufffd';
+    return point > 0 && point <= 0x10ffff && !(point >= 0xd800 && point <= 0xdfff)
+      ? String.fromCodePoint(point)
+      : '\ufffd';
   });
 }
 

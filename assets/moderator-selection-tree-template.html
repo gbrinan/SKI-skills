@@ -185,7 +185,8 @@
     const pager=(kind,index,total)=>`<div class="pager" aria-label="${esc(kind)} 페이지 이동"><button type="button" data-pager="${esc(kind)}" data-dir="-1" aria-label="이전 ${esc(kind)}" ${index===0?'disabled':''}>←</button><div class="pager__label" aria-live="polite">${index+1} / ${total}</div><button type="button" data-pager="${esc(kind)}" data-dir="1" aria-label="다음 ${esc(kind)}" ${index===total-1?'disabled':''}>→</button></div>`;
     const badges=(lv5)=>{
       const meta=statusMeta[lv5.eligible?lv5.status:'excluded'];
-      return `<div class="badges"><span class="badge" data-tone="${meta[1]}">${meta[0]}</span><span class="badge">Pain Point ${esc(lv5.painPoints.count)} · 업무상 불편 정도 ${esc(lv5.painPoints.severity)}</span><span class="badge">AI 전환 추천 ${esc(lv5.aiRecommendationCount)}</span></div>`;
+      const override=lv5.candidateOverrideReason?`<span class="badge" data-tone="warning">팀 재검토 · ${esc(lv5.candidateOverrideReason)}</span>`:'';
+      return `<div class="badges"><span class="badge" data-tone="${meta[1]}">${meta[0]}</span><span class="badge">Pain Point ${esc(lv5.painPoints.count)} · 업무상 불편 정도 ${esc(lv5.painPoints.severity)}</span><span class="badge">AI 전환 추천 ${esc(lv5.aiRecommendationCount)}</span>${override}</div>`;
     };
     function renderIntro(){
       const glossary=data.glossary.map(item=>`<dt>${esc(item.term)}</dt><dd>${esc(item.meaning)}</dd>`).join('');

@@ -104,6 +104,9 @@ export function validateModeratorData(value) {
       requireInteger(lv5.painPoints.count, `${path}.painPoints.count`);
       requireString(lv5.painPoints.severity, `${path}.painPoints.severity`);
       requireInteger(lv5.aiRecommendationCount, `${path}.aiRecommendationCount`);
+      if (lv5.candidateOverrideReason !== undefined) {
+        requireString(lv5.candidateOverrideReason, `${path}.candidateOverrideReason`);
+      }
       requireObject(lv5.signals, `${path}.signals`);
       if (Object.keys(lv5.signals).length === 0) fail(`${path}.signals는 한 개 이상이어야 합니다.`);
       for (const [key, signal] of Object.entries(lv5.signals)) {
@@ -116,6 +119,17 @@ export function validateModeratorData(value) {
         for (const key of ['id', 'name', 'reason']) requireString(lv6[key], `${lv6Path}.${key}`);
         requireOneOf(lv6.role, ROLE_VALUES, `${lv6Path}.role`);
       });
+      const machineScope = lv5.lv6s.filter(task => ['ai', 'assisted'].includes(task.role)).length;
+      if (lv5.eligible && lv5.lv6s.length < 3) fail(`${path}: 세부 업무가 3개 미만인데 후보로 표시되었습니다.`);
+      if (lv5.eligible && machineScope < 2) fail(`${path}: AI 처리·보조가 2개 미만인데 후보로 표시되었습니다.`);
+      if (
+        lv5.eligible
+        && lv5.painPoints.count === 0
+        && lv5.aiRecommendationCount === 0
+        && !lv5.candidateOverrideReason
+      ) {
+        fail(`${path}: Pain Point와 AI 전환 추천이 모두 없는 후보에는 팀 재검토 이유가 필요합니다.`);
+      }
     });
   });
   requireObject(value.selection, 'selection');

@@ -186,12 +186,41 @@ try {
   const humanOnlyJson = join(temp, 'human-only.json');
   const humanOnlyHtml = join(temp, 'human-only.html');
   await writeFile(humanOnlyJson, JSON.stringify(humanOnly), 'utf8');
-  expect(run(renderer, humanOnlyJson, humanOnlyHtml).status === 0, '사람 업무 부정 fixture 렌더 실패');
-  expect(run(validator, humanOnlyHtml).status !== 0, '사람 업무만 있는 후보가 검증을 통과함');
+  expect(run(renderer, humanOnlyJson, humanOnlyHtml).status !== 0, '사람 업무만 있는 후보가 렌더러를 통과함');
+  const editedHumanOnlyHtml = join(temp, 'edited-human-only.html');
+  await writeFile(editedHumanOnlyHtml, editJsonBlock(finalSource, 'moderator-data', value => {
+    value.lv4s[1].lv5s[1].eligible = true;
+  }), 'utf8');
+  expect(run(validator, editedHumanOnlyHtml).status !== 0, '사람 업무만 있는 후보가 validator를 통과함');
+
+  const noSignal = structuredClone(data);
+  const noSignalCandidate = noSignal.lv4s[0].lv5s[0];
+  noSignalCandidate.painPoints.count = 0;
+  noSignalCandidate.aiRecommendationCount = 0;
+  const noSignalJson = join(temp, 'no-signal.json');
+  await writeFile(noSignalJson, JSON.stringify(noSignal), 'utf8');
+  expect(run(renderer, noSignalJson, join(temp, 'no-signal.html')).status !== 0, '근거 없는 후보가 렌더러를 통과함');
+  const editedNoSignalHtml = join(temp, 'edited-no-signal.html');
+  await writeFile(editedNoSignalHtml, editJsonBlock(finalSource, 'moderator-data', value => {
+    value.lv4s[0].lv5s[0].painPoints.count = 0;
+    value.lv4s[0].lv5s[0].aiRecommendationCount = 0;
+  }), 'utf8');
+  expect(run(validator, editedNoSignalHtml).status !== 0, '근거 없는 후보가 validator를 통과함');
+
+  noSignalCandidate.candidateOverrideReason = '팀 토의에서 반복 민원이 확인됨';
+  const overrideJson = join(temp, 'candidate-override.json');
+  const overrideHtml = join(temp, 'candidate-override.html');
+  await writeFile(overrideJson, JSON.stringify(noSignal), 'utf8');
+  expect(run(renderer, overrideJson, overrideHtml).status === 0, '팀 재검토 이유가 있는 후보를 렌더하지 못함');
+  expect(run(validator, overrideHtml).status === 0, '팀 재검토 이유가 있는 후보를 validator가 거부함');
 
   const acronymHtml = join(temp, 'bare-acronym.html');
   await writeFile(acronymHtml, finalSource.replace('</body>', '<p>PP</p></body>'), 'utf8');
   expect(run(validator, acronymHtml).status !== 0, '설명 없는 약어가 검증을 통과함');
+
+  const encodedAcronymHtml = join(temp, 'encoded-acronym.html');
+  await writeFile(encodedAcronymHtml, finalSource.replace('</body>', '<p>P&#80;</p></body>'), 'utf8');
+  expect(run(validator, encodedAcronymHtml).status !== 0, '문자 참조로 숨긴 화면 약어가 검증을 통과함');
 
   const explainedTermHtml = join(temp, 'explained-term.html');
   await writeFile(explainedTermHtml, finalSource.replace('</body>', '<p>Gate(판정 기준)</p></body>'), 'utf8');
