@@ -157,6 +157,10 @@ try {
   await writeFile(solidusAtfHtml, finalSource.replace('</body>', '<script/ id="atf-data" type="application/json">{}</script></body>'), 'utf8');
   expect(run(validator, solidusAtfHtml).status !== 0, 'solidus 뒤 중복 atf-data가 validator를 통과함');
 
+  const scriptureHtml = join(temp, 'scripture-visible.html');
+  await writeFile(scriptureHtml, finalSource.replace('<body>', '<body><scripture><p>PP</p></scripture>'), 'utf8');
+  expect(run(validator, scriptureHtml).status !== 0, 'scripture 요소의 화면 약어가 validator를 통과함');
+
   const hostileCount = structuredClone(data);
   hostileCount.lv4s[0].lv5s[0].painPoints.count = '</span><img src=x onerror=alert(1)>';
   const hostileCountJson = join(temp, 'hostile-count.json');

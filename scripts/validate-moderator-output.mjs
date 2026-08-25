@@ -69,8 +69,8 @@ if (data) {
 }
 
 const visible = html
-  .replace(/<script[\s\S]*?<\/script>/gi, ' ')
-  .replace(/<style[\s\S]*?<\/style>/gi, ' ')
+  .replace(/<script(?=[\s/>])[\s\S]*?<\/script\s*>/gi, ' ')
+  .replace(/<style(?=[\s/>])[\s\S]*?<\/style\s*>/gi, ' ')
   .replace(/<[^>]+>/g, ' ')
   .replace(/\s+/g, ' ');
 const forbidden = [
@@ -115,9 +115,10 @@ function attributeValue(attributes, name) {
   const pattern = new RegExp(`(?:^|[\\s/])${name}\\s*=\\s*(?:"([^"]*)"|'([^']*)'|([^\\s"'=<>]+))`, 'i');
   const match = attributes.match(pattern);
   const value = match ? (match[1] ?? match[2] ?? match[3]) : undefined;
-  return value?.replace(/&#(?:x([0-9a-f]+)|([0-9]+));?/gi, (_, hex, decimal) => (
-    String.fromCodePoint(Number.parseInt(hex ?? decimal, hex ? 16 : 10))
-  ));
+  return value?.replace(/&#(?:x([0-9a-f]+)|([0-9]+));?/gi, (_, hex, decimal) => {
+    const point = Number.parseInt(hex ?? decimal, hex ? 16 : 10);
+    return point <= 0x10ffff ? String.fromCodePoint(point) : '\ufffd';
+  });
 }
 
 function tagEnd(source, start) {
