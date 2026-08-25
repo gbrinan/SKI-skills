@@ -137,6 +137,18 @@ try {
   await writeFile(unquotedDuplicateHtml, finalSource.replace('<body>', '<body><script id=moderator-data type=application/json>{}</script>'), 'utf8');
   expect(run(validator, unquotedDuplicateHtml).status !== 0, '따옴표 없는 중복 moderator-data가 validator를 통과함');
 
+  const encodedDuplicateHtml = join(temp, 'encoded-duplicate.html');
+  await writeFile(encodedDuplicateHtml, finalSource.replace('<body>', '<body><script id="moderator&#45;data" type="application/json">{}</script>'), 'utf8');
+  expect(run(validator, encodedDuplicateHtml).status !== 0, '문자 참조로 숨긴 중복 moderator-data가 validator를 통과함');
+
+  const encodedAtfHtml = join(temp, 'encoded-atf.html');
+  await writeFile(encodedAtfHtml, finalSource.replace('</body>', '<script id="atf&#x2d;data" type="application/json">{}</script></body>'), 'utf8');
+  expect(run(validator, encodedAtfHtml).status !== 0, '16진 문자 참조로 숨긴 중복 atf-data가 validator를 통과함');
+
+  const malformedCloseHtml = join(temp, 'malformed-close.html');
+  await writeFile(malformedCloseHtml, finalSource.replace('</script>', '</scripture>'), 'utf8');
+  expect(run(validator, malformedCloseHtml).status !== 0, '잘못된 script 닫는 태그가 validator를 통과함');
+
   const hostileCount = structuredClone(data);
   hostileCount.lv4s[0].lv5s[0].painPoints.count = '</span><img src=x onerror=alert(1)>';
   const hostileCountJson = join(temp, 'hostile-count.json');

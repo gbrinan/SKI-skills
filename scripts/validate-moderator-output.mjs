@@ -114,7 +114,10 @@ console.log(`검증 통과: 6개 페이지, LV4 ${data.lv4s.length}개, LV5 ${[.
 function attributeValue(attributes, name) {
   const pattern = new RegExp(`(?:^|\\s)${name}\\s*=\\s*(?:"([^"]*)"|'([^']*)'|([^\\s"'=<>]+))`, 'i');
   const match = attributes.match(pattern);
-  return match ? (match[1] ?? match[2] ?? match[3]) : undefined;
+  const value = match ? (match[1] ?? match[2] ?? match[3]) : undefined;
+  return value?.replace(/&#(?:x([0-9a-f]+)|([0-9]+));?/gi, (_, hex, decimal) => (
+    String.fromCodePoint(Number.parseInt(hex ?? decimal, hex ? 16 : 10))
+  ));
 }
 
 function tagEnd(source, start) {
@@ -145,7 +148,12 @@ function jsonBlocks(source, id) {
       continue;
     }
     const openEnd = tagEnd(source, start + 7);
-    const closeStart = lower.indexOf('</script', openEnd + 1);
+    let closeStart = lower.indexOf('</script', openEnd + 1);
+    while (closeStart !== -1) {
+      const closeBoundary = lower[closeStart + 8];
+      if (!closeBoundary || /[\s>]/.test(closeBoundary)) break;
+      closeStart = lower.indexOf('</script', closeStart + 8);
+    }
     if (closeStart === -1) throw new Error('script 닫는 태그가 없습니다.');
     const closeEnd = tagEnd(source, closeStart + 8);
     const attributes = source.slice(start + 7, openEnd);
