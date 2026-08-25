@@ -12,14 +12,15 @@ if (!htmlArg) {
 
 const html = await readFile(resolve(process.cwd(), htmlArg), 'utf8');
 const errors = [];
-const moderatorMatches = [...html.matchAll(/<script id="moderator-data" type="application\/json">([\s\S]*?)<\/script>/g)];
-if (moderatorMatches.length !== 1) errors.push(`moderator-data 블록은 정확히 1개여야 합니다: ${moderatorMatches.length}개`);
-const moderatorMatch = moderatorMatches[0];
+const moderatorBlocks = jsonBlocks(html, 'moderator-data');
+if (moderatorBlocks.length !== 1) errors.push(`moderator-data 블록은 정확히 1개여야 합니다: ${moderatorBlocks.length}개`);
+if (moderatorBlocks.length === 1 && moderatorBlocks[0].type !== 'application/json') errors.push('moderator-data type은 application/json이어야 합니다.');
+const moderatorBlock = moderatorBlocks[0];
 
 let data;
-if (moderatorMatch) {
+if (moderatorBlock) {
   try {
-    data = JSON.parse(moderatorMatch[1]);
+    data = JSON.parse(moderatorBlock.content);
     validateModeratorData(data);
   } catch (error) {
     errors.push(`moderator-data JSON 오류: ${error.message}`);
@@ -52,14 +53,15 @@ if (data) {
       }
     }
   }
-  const atfMatches = [...html.matchAll(/<script id="atf-data" type="application\/json">([\s\S]*?)<\/script>/g)];
-  if (atfMatches.length > 1) errors.push(`atf-data 블록은 최대 1개여야 합니다: ${atfMatches.length}개`);
-  const atfMatch = atfMatches[0];
-  if (data.selection?.finalized && !atfMatch) errors.push('판정 완료 HTML에 atf-data가 없습니다.');
-  if (!data.selection?.finalized && atfMatch) errors.push('판정 전 HTML에 atf-data가 있습니다.');
-  if (atfMatch) {
+  const atfBlocks = jsonBlocks(html, 'atf-data');
+  if (atfBlocks.length > 1) errors.push(`atf-data 블록은 최대 1개여야 합니다: ${atfBlocks.length}개`);
+  if (atfBlocks.length === 1 && atfBlocks[0].type !== 'application/json') errors.push('atf-data type은 application/json이어야 합니다.');
+  const atfBlock = atfBlocks[0];
+  if (data.selection.finalized && !atfBlock) errors.push('판정 완료 HTML에 atf-data가 없습니다.');
+  if (!data.selection.finalized && atfBlock) errors.push('판정 전 HTML에 atf-data가 있습니다.');
+  if (atfBlock) {
     try {
-      const atf = JSON.parse(atfMatch[1]);
+      const atf = JSON.parse(atfBlock.content);
       validateAtfData(atf);
       if (!isDeepStrictEqual(atf, data.atfData)) errors.push('atf-data와 moderator-data의 ATF 값이 다릅니다.');
     } catch (error) { errors.push(`atf-data JSON 오류: ${error.message}`); }
@@ -108,3 +110,52 @@ if (errors.length) {
   process.exit(1);
 }
 console.log(`검증 통과: 6개 페이지, LV4 ${data.lv4s.length}개, LV5 ${[...new Set(data.lv4s.flatMap(item => item.lv5s.map(lv5 => lv5.id)))].length}개, LV6 ${[...new Set(data.lv4s.flatMap(item => item.lv5s.flatMap(lv5 => lv5.lv6s.map(lv6 => lv6.id))))].length}개`);
+
+function attributeValue(attributes, name) {
+  const pattern = new RegExp(`(?:^|\\s)${name}\\s*=\\s*(?:"([^"]*)"|'([^']*)'|([^\\s"'=<>]+))`, 'i');
+  const match = attributes.match(pattern);
+  return match ? (match[1] ?? match[2] ?? match[3]) : undefined;
+}
+
+function tagEnd(source, start) {
+  let quote;
+  for (let index = start; index < source.length; index += 1) {
+    const character = source[index];
+    if (quote) {
+      if (character === quote) quote = undefined;
+    } else if (character === '"' || character === "'") {
+      quote = character;
+    } else if (character === '>') {
+      return index;
+    }
+  }
+  throw new Error('script 태그가 닫히지 않았습니다.');
+}
+
+function jsonBlocks(source, id) {
+  const blocks = [];
+  const lower = source.toLowerCase();
+  let cursor = 0;
+  while (cursor < source.length) {
+    const start = lower.indexOf('<script', cursor);
+    if (start === -1) break;
+    const boundary = lower[start + 7];
+    if (boundary && !/[\s>]/.test(boundary)) {
+      cursor = start + 7;
+      continue;
+    }
+    const openEnd = tagEnd(source, start + 7);
+    const closeStart = lower.indexOf('</script', openEnd + 1);
+    if (closeStart === -1) throw new Error('script 닫는 태그가 없습니다.');
+    const closeEnd = tagEnd(source, closeStart + 8);
+    const attributes = source.slice(start + 7, openEnd);
+    if (attributeValue(attributes, 'id') === id) {
+      blocks.push({
+        content: source.slice(openEnd + 1, closeStart),
+        type: attributeValue(attributes, 'type'),
+      });
+    }
+    cursor = closeEnd + 1;
+  }
+  return blocks;
+}

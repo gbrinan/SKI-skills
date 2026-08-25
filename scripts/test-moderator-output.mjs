@@ -125,6 +125,18 @@ try {
   await writeFile(duplicateAtfHtml, finalSource.replace('</body>', '<script id="atf-data" type="application/json">{}</script></body>'), 'utf8');
   expect(run(validator, duplicateAtfHtml).status !== 0, '중복 atf-data 블록이 validator를 통과함');
 
+  const reorderedDuplicateHtml = join(temp, 'reordered-duplicate.html');
+  await writeFile(reorderedDuplicateHtml, finalSource.replace('<body>', '<body><script type="application/json" id="moderator-data">{}</script>'), 'utf8');
+  expect(run(validator, reorderedDuplicateHtml).status !== 0, '속성 순서를 바꾼 중복 moderator-data가 validator를 통과함');
+
+  const reorderedAtfHtml = join(temp, 'reordered-atf.html');
+  await writeFile(reorderedAtfHtml, finalSource.replace('</body>', '<script type="application/json" id="atf-data">{}</script></body>'), 'utf8');
+  expect(run(validator, reorderedAtfHtml).status !== 0, '속성 순서를 바꾼 중복 atf-data가 validator를 통과함');
+
+  const unquotedDuplicateHtml = join(temp, 'unquoted-duplicate.html');
+  await writeFile(unquotedDuplicateHtml, finalSource.replace('<body>', '<body><script id=moderator-data type=application/json>{}</script>'), 'utf8');
+  expect(run(validator, unquotedDuplicateHtml).status !== 0, '따옴표 없는 중복 moderator-data가 validator를 통과함');
+
   const hostileCount = structuredClone(data);
   hostileCount.lv4s[0].lv5s[0].painPoints.count = '</span><img src=x onerror=alert(1)>';
   const hostileCountJson = join(temp, 'hostile-count.json');
