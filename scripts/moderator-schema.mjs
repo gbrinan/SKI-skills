@@ -1,5 +1,6 @@
 const STATUS_VALUES = ['green', 'yellow', 'red', 'excluded'];
 const SIGNAL_VALUES = ['met', 'unmet', 'unknown'];
+const SIGNAL_KEYS = ['반복성', '위임 가능성', '다단계성', '순서 가변성', '검증 가능성'];
 const ROLE_VALUES = ['ai', 'assisted', 'human_input', 'integration', 'human_final'];
 const VERDICT_VALUES = ['권장', '조건부 권장', '대안 권장'];
 const HUMAN_VALUES = ['자동', '증강', '사람고유'];
@@ -108,10 +109,21 @@ export function validateModeratorData(value) {
         requireString(lv5.candidateOverrideReason, `${path}.candidateOverrideReason`);
       }
       requireObject(lv5.signals, `${path}.signals`);
-      if (Object.keys(lv5.signals).length === 0) fail(`${path}.signals는 한 개 이상이어야 합니다.`);
+      if (
+        Object.keys(lv5.signals).length !== SIGNAL_KEYS.length
+        || SIGNAL_KEYS.some(key => !Object.hasOwn(lv5.signals, key))
+      ) fail(`${path}.signals는 5개 선정 기준을 정확히 포함해야 합니다.`);
       for (const [key, signal] of Object.entries(lv5.signals)) {
         requireOneOf(signal, SIGNAL_VALUES, `${path}.signals.${key}`);
       }
+      const signalValues = Object.values(lv5.signals);
+      const expectedStatus = signalValues.includes('unmet')
+        ? 'red'
+        : signalValues.includes('unknown') ? 'yellow' : 'green';
+      if (lv5.status !== 'excluded' && lv5.status !== expectedStatus) {
+        fail(`${path}.status가 5개 선정 기준의 신호와 다릅니다: ${expectedStatus}이어야 합니다.`);
+      }
+      if (lv5.eligible && lv5.status === 'excluded') fail(`${path}: 후보 업무에 excluded 상태를 쓸 수 없습니다.`);
       requireList(lv5.lv6s, `${path}.lv6s`);
       lv5.lv6s.forEach((lv6, lv6Index) => {
         const lv6Path = `${path}.lv6s[${lv6Index}]`;

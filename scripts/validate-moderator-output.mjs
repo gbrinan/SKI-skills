@@ -12,6 +12,7 @@ if (!htmlArg) {
 
 const html = await readFile(resolve(process.cwd(), htmlArg), 'utf8');
 const errors = [];
+const staticTags = elementTags(stripRawText(html).replace(/<!--[\s\S]*?-->/g, ' '));
 const moderatorBlocks = jsonBlocks(html, 'moderator-data');
 if (moderatorBlocks.length !== 1) errors.push(`moderator-data 블록은 정확히 1개여야 합니다: ${moderatorBlocks.length}개`);
 if (moderatorBlocks.length === 1 && moderatorBlocks[0].type !== 'application/json') errors.push('moderator-data type은 application/json이어야 합니다.');
@@ -30,11 +31,18 @@ if (moderatorBlock) {
 
 const requiredPages = ['intro', 'overview', 'lv4', 'lv5', 'lv6', 'final'];
 for (const page of requiredPages) {
-  if (!html.includes(`data-page-panel="${page}"`)) errors.push(`필수 페이지 누락: ${page}`);
-  if (!html.includes(`id="page-${page}"`)) errors.push(`필수 페이지 패널 ID 누락: page-${page}`);
-  if (!html.includes(`id="tab-${page}"`)) errors.push(`필수 페이지 탭 ID 누락: tab-${page}`);
-  if (!html.includes(`aria-controls="page-${page}"`)) errors.push(`탭-패널 연결 누락: ${page}`);
-  if (!html.includes(`aria-labelledby="tab-${page}"`)) errors.push(`패널-탭 연결 누락: ${page}`);
+  const panel = staticTags.find(tag => attributeValue(tag.attributes, 'data-page-panel') === page);
+  const tab = staticTags.find(tag => attributeValue(tag.attributes, 'data-page') === page);
+  if (!panel) errors.push(`필수 페이지 누락: ${page}`);
+  if (panel && (panel.name !== 'section' || attributeValue(panel.attributes, 'id') !== `page-${page}`)) {
+    errors.push(`필수 페이지 패널 ID 누락: page-${page}`);
+  }
+  if (tab && (tab.name !== 'button' || attributeValue(tab.attributes, 'id') !== `tab-${page}`)) {
+    errors.push(`필수 페이지 탭 ID 누락: tab-${page}`);
+  }
+  if (!tab) errors.push(`필수 페이지 탭 누락: ${page}`);
+  if (tab && attributeValue(tab.attributes, 'aria-controls') !== `page-${page}`) errors.push(`탭-패널 연결 누락: ${page}`);
+  if (panel && attributeValue(panel.attributes, 'aria-labelledby') !== `tab-${page}`) errors.push(`패널-탭 연결 누락: ${page}`);
 }
 
 if (data) {
@@ -65,9 +73,7 @@ if (data) {
   }
 }
 
-const visible = decodeNumericEntities(html
-  .replace(/<script(?=[\s/>])[\s\S]*?<\/script\s*>/gi, ' ')
-  .replace(/<style(?=[\s/>])[\s\S]*?<\/style\s*>/gi, ' ')
+const visible = decodeNumericEntities(stripRawText(html)
   .replace(/<[^>]+>/g, ' '))
   .replace(/\s+/g, ' ');
 const forbidden = [
@@ -99,7 +105,7 @@ if (data) {
 if (!html.includes('Pain Point')) errors.push('Pain Point의 쉬운 설명이 없습니다.');
 if (!html.includes('Human in the Loop')) errors.push('Human in the Loop의 쉬운 설명이 없습니다.');
 if (!html.includes('사람이 준비') || !html.includes('사람이 최종 책임')) errors.push('사람 업무 시작·정지 경계가 없습니다.');
-if (!html.includes('data-page="lv4"') || !html.includes('data-pager')) errors.push('단계·내부 페이지 탐색 계약이 없습니다.');
+if (!staticTags.some(tag => attributeValue(tag.attributes, 'data-page') === 'lv4') || !html.includes('data-pager')) errors.push('단계·내부 페이지 탐색 계약이 없습니다.');
 
 if (errors.length) {
   console.error(`검증 실패 (${errors.length}건)`);
@@ -122,6 +128,30 @@ function decodeNumericEntities(value) {
       ? String.fromCodePoint(point)
       : '\ufffd';
   });
+}
+
+function stripRawText(value) {
+  return value
+    .replace(/<script(?=[\s/>])[\s\S]*?<\/script\s*>/gi, ' ')
+    .replace(/<style(?=[\s/>])[\s\S]*?<\/style\s*>/gi, ' ');
+}
+
+function elementTags(source) {
+  const tags = [];
+  let cursor = 0;
+  while (cursor < source.length) {
+    const start = source.indexOf('<', cursor);
+    if (start === -1) break;
+    const match = source.slice(start + 1).match(/^([a-z][\w:-]*)/i);
+    if (!match) {
+      cursor = start + 1;
+      continue;
+    }
+    const end = tagEnd(source, start + 1 + match[1].length);
+    tags.push({ name: match[1].toLowerCase(), attributes: source.slice(start + 1 + match[1].length, end) });
+    cursor = end + 1;
+  }
+  return tags;
 }
 
 function tagEnd(source, start) {

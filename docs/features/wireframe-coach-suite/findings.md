@@ -20,10 +20,10 @@
 
 | 파일 | 작성 Agent | 스킬이 뽑아 쓰는 값 |
 |---|---|---|
-| 업무 Task Tree 정의서 | Agent 1 | Lv1~5 트리, 프로세스별 빈도·소요시간·산출물, Activity별 데이터소스·처리로직·HITL·선후행 |
+| 업무 Task Tree 정의서 | Agent 1 | Lv1~5 트리, 프로세스별 빈도·소요시간·산출물, Activity별 데이터소스·처리로직·Human in the Loop(사람 개입)·선후행 |
 | Task Tree 통합본 | Agent 2-1 | 노드 수 검증, Pain Point 원본 |
-| PP·AX 매핑 정의서 | Agent 2-2 | PP 14건 유형·심각도·매핑 Activity, AX화 추천 Task, 우선순위 매트릭스 |
-| Process Flow 설계서 | Agent 3 | Lv6 분해, 분기·루프백 수, HITL 포인트, PP-Flow 교차 |
+| Pain Point(업무상 불편·병목) 및 AI 전환 매핑 정의서 | Agent 2-2 | Pain Point 14건 유형·심각도·매핑 Activity, AI 전환 추천 Task, 우선순위 매트릭스 |
+| Process Flow 설계서 | Agent 3 | Lv6 분해, 분기·이전 단계로 되돌아감 수, Human in the Loop(사람 개입) 지점, Pain Point와 업무 흐름 교차 |
 | To-Be 종합보고서 | Agent 4 | ECRS 액션, To-Be Flow, 절감 시간 |
 
 ### 레벨 명칭 불일치 (중요)

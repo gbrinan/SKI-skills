@@ -76,6 +76,23 @@ try {
   await writeFile(editedStatusHtml, finalSource.replace('"status":"green"', '"status":"invalid-status"'), 'utf8');
   expect(run(validator, editedStatusHtml).status !== 0, '수동 편집된 허용 목록 밖 상태가 validator를 통과함');
 
+  const mismatchedStatus = structuredClone(data);
+  mismatchedStatus.lv4s[0].lv5s[0].signals['반복성'] = 'unmet';
+  const mismatchedStatusJson = join(temp, 'mismatched-status.json');
+  await writeFile(mismatchedStatusJson, JSON.stringify(mismatchedStatus), 'utf8');
+  expect(run(renderer, mismatchedStatusJson, join(temp, 'mismatched-status.html')).status !== 0, '선정 기준과 다른 신호등이 렌더러를 통과함');
+  const editedMismatchedStatusHtml = join(temp, 'edited-mismatched-status.html');
+  await writeFile(editedMismatchedStatusHtml, editJsonBlock(finalSource, 'moderator-data', value => {
+    value.lv4s[0].lv5s[0].signals['반복성'] = 'unmet';
+  }), 'utf8');
+  expect(run(validator, editedMismatchedStatusHtml).status !== 0, '선정 기준과 다른 신호등이 validator를 통과함');
+
+  const missingSignal = structuredClone(data);
+  delete missingSignal.lv4s[0].lv5s[0].signals['검증 가능성'];
+  const missingSignalJson = join(temp, 'missing-signal.json');
+  await writeFile(missingSignalJson, JSON.stringify(missingSignal), 'utf8');
+  expect(run(renderer, missingSignalJson, join(temp, 'missing-signal.html')).status !== 0, '5개 선정 기준이 아닌 신호 묶음이 허용됨');
+
   const malformedCases = [
     ['team-object', 'moderator-data', value => { value.meta.team = {}; }],
     ['eligible-string', 'moderator-data', value => { value.lv4s[0].lv5s[0].eligible = 'true'; }],
@@ -116,6 +133,12 @@ try {
   const brokenPanelHtml = join(temp, 'broken-panel.html');
   await writeFile(brokenPanelHtml, finalSource.replace('id="page-lv4"', 'id="page-lv4-broken"'), 'utf8');
   expect(run(validator, brokenPanelHtml).status !== 0, '필수 페이지 패널 ID 누락이 validator를 통과함');
+
+  const commentedPanelHtml = join(temp, 'commented-panel.html');
+  await writeFile(commentedPanelHtml, finalSource
+    .replace('id="page-lv4"', 'id="page-lv4-broken"')
+    .replace('<body>', '<body><!-- id="page-lv4" -->'), 'utf8');
+  expect(run(validator, commentedPanelHtml).status !== 0, '주석 속 가짜 패널 ID가 validator를 통과함');
 
   const duplicateDataHtml = join(temp, 'duplicate-data.html');
   await writeFile(duplicateDataHtml, finalSource.replace('</body>', '<script id="moderator-data" type="application/json">{}</script></body>'), 'utf8');
