@@ -39,6 +39,7 @@
 |---|---|
 | 스킬을 2개로 나누고 역할을 선정/설계로 고정 | paperthin: 스킬 하나 = 실패 모드 하나 (잘못된 후보 선정 / 뭉뚱그린 판단 기준) |
 | 워크시트 기준을 5개(반복성·위임·다단계·순서가변·검증)로 하고 가치는 대화로만 | 5개는 md 파일에서 기계적으로 채울 수 있고, 가치(시간·감수)는 참가자 발화에서만 와야 함 (ATF G5 원칙 유지) |
+| wireframe-moderator-coach(v1.3)를 저장소에서 제거하고 jcurve_ski의 camp-guide-coach(v4.2, `SKILL.md`+`result_reference.html`)로 대체 | 두 스킬이 "Lv5 업무 선정 + 신호등 판정" 역할로 겹침. jcurve_ski 쪽이 실측(HRD 11종 등)으로 6~7회 더 다듬어진 최신 버전이라 그쪽을 정본으로 채택. wireframe-coach 본문 중 "wireframe-moderator-coach의 일" 참조를 "camp-guide-coach의 일"로 치환 |
 | 산출물 연결을 `@@STATE@@` 텍스트 블록으로 | file-based: 파일이 기억. HTML 내장 JSON보다 붙여넣기 재개가 쉬움. WireframeCoach v8의 `@@LV6@@` 압축 블록 패턴 계승 |
 | 스킬 2에서 에이전트 적합성 재판정 제거 | 스킬 1의 판정을 신뢰하고 중복 제거 (paperthin: ssotize) |
 | 짝 점검 게이트 제거 | 팀 모더레이션 상황(전원이 한 화면)에서는 불필요. 개인 세션용 v8 잔재 |

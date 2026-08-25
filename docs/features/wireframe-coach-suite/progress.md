@@ -128,3 +128,12 @@ jcurve_ski lv5-packaging-prompt-v2 검토 → 팀 확정 인터뷰 역할을 이
 
 Sonnet 5로 모더레이터 코치 v1.3 실행: 신호등·추림 완전 일치, "판정 전" 정지 준수.
 계약 구멍 발견·봉합: 판정 전 HTML에 atf-data 금지 (허용값 밖 verdict의 하류 오염 방지). 예시 팩 헤더 수치 정합.
+
+## Session 2026-08-25 — wireframe-moderator-coach → camp-guide-coach 교체 ✅
+
+1. Google Drive `03_코치` 폴더에 스킬 3종(wireframe-coach·wireframe-moderator-coach·camp-guide-coach) zip 업로드 작업 중, 두 코치가 "Lv5 선정+신호등 판정" 역할로 겹침을 사용자가 지적
+2. 사용자 결정: wireframe-moderator-coach(v1.3) 삭제, jcurve_ski 저장소의 camp-guide-coach(v4.2)로 대체
+3. 변경: `skills/wireframe-moderator-coach.md`·`.claude/skills/wireframe-moderator-coach/`·`distribution/innohub/와이어프레임모더레이터코치_v1.3.md` 삭제 →
+   `skills/camp-guide-coach.md`·`.claude/skills/camp-guide-coach/{SKILL.md,result_reference.html}`·`distribution/innohub/디자인캠프해설코치_v4.2.md` 추가
+4. wireframe-coach 본문의 "wireframe-moderator-coach의 일" 참조를 "camp-guide-coach의 일"로 치환 (skills/, .claude/skills/ 양쪽)
+5. 근거는 findings.md Technical Decisions 표에 기록
