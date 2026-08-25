@@ -12,7 +12,7 @@ if (!htmlArg) {
 
 const html = await readFile(resolve(process.cwd(), htmlArg), 'utf8');
 const errors = [];
-const staticTags = elementTags(stripRawText(html).replace(/<!--[\s\S]*?-->/g, ' '));
+const staticTags = elementTags(stripInertTemplates(stripRawText(html)).replace(/<!--[\s\S]*?-->/g, ' '));
 const moderatorBlocks = jsonBlocks(html, 'moderator-data');
 if (moderatorBlocks.length !== 1) errors.push(`moderator-data 블록은 정확히 1개여야 합니다: ${moderatorBlocks.length}개`);
 if (moderatorBlocks.length === 1 && moderatorBlocks[0].type !== 'application/json') errors.push('moderator-data type은 application/json이어야 합니다.');
@@ -96,6 +96,8 @@ if (data) {
       ]),
     ]),
     data.selection?.condition,
+    data.selection?.selectionReason,
+    data.selection?.overrideReason,
   ].filter(Boolean).join(' ');
   for (const [pattern, label] of forbidden) {
     if (pattern.test(visibleData)) errors.push(`화면 데이터에 설명 없는 약어·개념이 있습니다: ${label}`);
@@ -134,6 +136,10 @@ function stripRawText(value) {
   return value
     .replace(/<script(?=[\s/>])[\s\S]*?<\/script\s*>/gi, ' ')
     .replace(/<style(?=[\s/>])[\s\S]*?<\/style\s*>/gi, ' ');
+}
+
+function stripInertTemplates(value) {
+  return value.replace(/<template(?=[\s/>])[\s\S]*?<\/template\s*>/gi, ' ');
 }
 
 function elementTags(source) {

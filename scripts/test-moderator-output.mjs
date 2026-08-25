@@ -52,6 +52,51 @@ try {
   expect(run(validator, preHtml).status === 0, '판정 전 본 검증 실패');
   expect(!(await readFile(preHtml, 'utf8')).includes('id="atf-data"'), '판정 전 본에 atf-data가 생김');
 
+  const missingSourceRecommendation = structuredClone(data);
+  delete missingSourceRecommendation.lv4s[0].lv5s[0].sourceRecommendation;
+  const missingSourceRecommendationJson = join(temp, 'missing-source-recommendation.json');
+  await writeFile(missingSourceRecommendationJson, JSON.stringify(missingSourceRecommendation), 'utf8');
+  expect(run(renderer, missingSourceRecommendationJson, join(temp, 'missing-source-recommendation.html')).status !== 0, '원본 AI 전환 추천 여부가 없는 데이터가 허용됨');
+
+  const invalidSourceRecommendation = structuredClone(data);
+  invalidSourceRecommendation.lv4s[0].lv5s[0].sourceRecommendation = 'ranked-first';
+  const invalidSourceRecommendationJson = join(temp, 'invalid-source-recommendation.json');
+  await writeFile(invalidSourceRecommendationJson, JSON.stringify(invalidSourceRecommendation), 'utf8');
+  expect(run(renderer, invalidSourceRecommendationJson, join(temp, 'invalid-source-recommendation.html')).status !== 0, '원본 추천을 새 순위처럼 저장한 데이터가 허용됨');
+
+  const missingTeamConfirmation = structuredClone(data);
+  delete missingTeamConfirmation.selection.confirmedByTeam;
+  delete missingTeamConfirmation.selection.selectionReason;
+  const missingTeamConfirmationJson = join(temp, 'missing-team-confirmation.json');
+  await writeFile(missingTeamConfirmationJson, JSON.stringify(missingTeamConfirmation), 'utf8');
+  expect(run(renderer, missingTeamConfirmationJson, join(temp, 'missing-team-confirmation.html')).status !== 0, '팀 선택 확인·이유 없는 판정 완료본이 허용됨');
+
+  const redSelection = structuredClone(data);
+  const redLv5 = redSelection.lv4s[0].lv5s[1];
+  const roleMapping = {
+    ai: ['자동', '스킬'], assisted: ['증강', '스킬'], human_input: ['사람고유', '사람'],
+    integration: ['증강', '사람'], human_final: ['사람고유', '사람'],
+  };
+  redSelection.selection = {
+    finalized: true, selectedLv5Id: redLv5.id, confirmedByTeam: true,
+    selectionReason: '팀이 전략 판단 지원부터 시험하기로 합의했습니다.', verdict: '대안 권장',
+    condition: '경영진 판단과 최종 책임을 유지합니다.',
+  };
+  redSelection.atfData = {
+    ...redSelection.atfData,
+    verdict: '대안 권장', process: `${redSelection.lv4s[0].name} › ${redLv5.name}`,
+    targetTask: { no: 1, name: redLv5.name },
+    engines: redLv5.lv6s.map((task, index) => ({
+      no: index + 1, name: task.name, human: roleMapping[task.role][0], engine: roleMapping[task.role][1],
+    })),
+  };
+  const redSelectionJson = join(temp, 'red-selection.json');
+  await writeFile(redSelectionJson, JSON.stringify(redSelection), 'utf8');
+  expect(run(renderer, redSelectionJson, join(temp, 'red-selection.html')).status !== 0, '기준 미충족 업무의 예외 선택 이유가 없어도 판정 완료됨');
+  redSelection.selection.overrideReason = '전략 선택 자체가 아니라 비교표 초안 지원부터 검증하기로 했습니다.';
+  await writeFile(redSelectionJson, JSON.stringify(redSelection), 'utf8');
+  expect(run(renderer, redSelectionJson, join(temp, 'red-selection-with-reason.html')).status === 0, '예외 선택 이유가 있는 팀 선택을 렌더하지 못함');
+
   const missingAtf = structuredClone(data);
   delete missingAtf.atfData;
   const missingAtfJson = join(temp, 'missing-atf.json');
@@ -139,6 +184,12 @@ try {
     .replace('id="page-lv4"', 'id="page-lv4-broken"')
     .replace('<body>', '<body><!-- id="page-lv4" -->'), 'utf8');
   expect(run(validator, commentedPanelHtml).status !== 0, '주석 속 가짜 패널 ID가 validator를 통과함');
+
+  const templatePanelHtml = join(temp, 'template-panel.html');
+  await writeFile(templatePanelHtml, finalSource
+    .replace('id="page-lv4"', 'id="page-lv4-broken"')
+    .replace('<body>', '<body><template><section id="page-lv4" role="tabpanel"></section></template>'), 'utf8');
+  expect(run(validator, templatePanelHtml).status !== 0, '실행되지 않는 template 속 가짜 패널이 validator를 통과함');
 
   const duplicateDataHtml = join(temp, 'duplicate-data.html');
   await writeFile(duplicateDataHtml, finalSource.replace('</body>', '<script id="moderator-data" type="application/json">{}</script></body>'), 'utf8');
@@ -236,6 +287,11 @@ try {
   await writeFile(overrideJson, JSON.stringify(noSignal), 'utf8');
   expect(run(renderer, overrideJson, overrideHtml).status === 0, '팀 재검토 이유가 있는 후보를 렌더하지 못함');
   expect(run(validator, overrideHtml).status === 0, '팀 재검토 이유가 있는 후보를 validator가 거부함');
+
+  expect(finalSource.includes('전체 프로세스(LV4)'), '4단계 탐색의 전체 프로세스 요약이 없음');
+  expect(finalSource.includes('원본 AI 전환 추천'), '원본 추천과 모더레이터 판단을 분리해 보여주지 않음');
+  expect(finalSource.includes('모더레이터 기준 충족'), '모더레이터 기준 충족 요약이 없음');
+  expect(!finalSource.includes('후보 제외'), '팀 선택을 닫는 후보 제외 표현이 화면에 남음');
 
   const acronymHtml = join(temp, 'bare-acronym.html');
   await writeFile(acronymHtml, finalSource.replace('</body>', '<p>PP</p></body>'), 'utf8');

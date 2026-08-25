@@ -18,7 +18,7 @@
       "id": "P-S1-1", "name": "시장·전략 정보 관리", "lv3": "중장기 전략", "frequency": "매주 반복",
       "lv5s": [
         {
-          "id": "T-S1-1-1", "name": "시장 동향 브리핑", "eligible": true, "status": "green",
+          "id": "T-S1-1-1", "name": "시장 동향 브리핑", "eligible": true, "status": "green", "sourceRecommendation": "recommended",
           "painPoints": {"count": 2, "severity": "높음"}, "aiRecommendationCount": 2,
           "evidence": "여러 출처를 모아 중요도를 판단하고 요약한 뒤 사람이 발행 여부를 확인합니다.",
           "signals": {"반복성":"met","위임 가능성":"met","다단계성":"met","순서 가변성":"met","검증 가능성":"met"},
@@ -30,7 +30,7 @@
           ]
         },
         {
-          "id": "T-S1-1-2", "name": "전략 방향 수립", "eligible": false, "status": "red",
+          "id": "T-S1-1-2", "name": "전략 방향 수립", "eligible": false, "status": "red", "sourceRecommendation": "not_recommended",
           "painPoints": {"count": 0, "severity": "낮음"}, "aiRecommendationCount": 0,
           "evidence": "핵심 단계가 경영 판단과 합의이며 AI에 맡길 독립 업무가 두 개보다 적습니다.",
           "signals": {"반복성":"unmet","위임 가능성":"unmet","다단계성":"met","순서 가변성":"met","검증 가능성":"met"},
@@ -46,7 +46,7 @@
       "id": "P-S2-1", "name": "연간 사업계획 수립", "lv3": "사업계획·성과관리", "frequency": "연 1회·여러 차례 보완",
       "lv5s": [
         {
-          "id": "T-S2-1-1", "name": "부문 계획 취합·검증", "eligible": true, "status": "yellow",
+          "id": "T-S2-1-1", "name": "부문 계획 취합·검증", "eligible": true, "status": "yellow", "sourceRecommendation": "recommended",
           "painPoints": {"count": 2, "severity": "높음"}, "aiRecommendationCount": 2,
           "evidence": "버전 취합과 정합성 검사는 위임 가능하지만 재제출 기준은 팀 확인이 필요합니다.",
           "signals": {"반복성":"met","위임 가능성":"met","다단계성":"met","순서 가변성":"met","검증 가능성":"unknown"},
@@ -58,7 +58,7 @@
           ]
         },
         {
-          "id": "T-S2-1-2", "name": "은행 확인 서류 반영", "eligible": false, "status": "excluded",
+          "id": "T-S2-1-2", "name": "은행 확인 서류 반영", "eligible": false, "status": "excluded", "sourceRecommendation": "not_recommended",
           "painPoints": {"count": 1, "severity": "중간"}, "aiRecommendationCount": 0,
           "evidence": "은행 방문과 원본 확인이 핵심이라 자동화 후보에서는 빼고 입력 경계로 남깁니다.",
           "signals": {"반복성":"met","위임 가능성":"unmet","다단계성":"met","순서 가변성":"unmet","검증 가능성":"met"},
@@ -74,7 +74,7 @@
       "id": "P-S3-1", "name": "경영회의 운영", "lv3": "회의체·보고", "frequency": "매월 반복",
       "lv5s": [
         {
-          "id": "T-S3-1-1", "name": "회의 후속 조치 관리", "eligible": true, "status": "yellow",
+          "id": "T-S3-1-1", "name": "회의 후속 조치 관리", "eligible": true, "status": "yellow", "sourceRecommendation": "unknown",
           "painPoints": {"count": 1, "severity": "중간"}, "aiRecommendationCount": 2,
           "evidence": "회의 기록을 정리하고 담당·기한을 추출할 수 있지만 확정 전에 참석자 검토가 필요합니다.",
           "signals": {"반복성":"met","위임 가능성":"met","다단계성":"met","순서 가변성":"unknown","검증 가능성":"met"},
@@ -91,6 +91,8 @@
   "selection": {
     "finalized": true,
     "selectedLv5Id": "T-S1-1-1",
+    "confirmedByTeam": true,
+    "selectionReason": "매주 반복되고 팀이 초안 품질을 직접 확인할 수 있어 첫 파일럿으로 선택했습니다.",
     "verdict": "권장",
     "condition": "외부 자료 접근 권한과 발행 전 담당자 확인을 반드시 유지합니다."
   },

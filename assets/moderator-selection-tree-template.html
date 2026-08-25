@@ -3,14 +3,14 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="팀이 프로세스와 후보 업무를 단계별로 살펴보고 AI 에이전트 후보를 토의하는 모더레이터 보드">
-  <title>업무 후보 선정 보드</title>
+  <meta name="description" content="디자인 캠프 결과물을 확인하고 다시 설계할 LV5 업무를 고르는 디자인 캠프 해설 코치 보드">
+  <title>디자인 캠프 해설 코치 · LV5 선정 보드</title>
   <style>
     :root {
       --surface-page:#FFF9F1;--surface-paper:#FFFFFF;--surface-warm:#FFF0DD;--surface-dark:#2B211B;
       --text-primary:#2B211B;--text-secondary:#6F6259;--text-muted:#8C8179;--border-default:#E8D8C8;
       --accent-primary:#C84F13;--accent-hover:#A93F0A;--focus-ring:#0B63CE;--status-success:#166B3B;
-      --status-warning:#9B5C00;--status-error:#A52A2A;--status-human:#6B4EA0;
+      --status-warning:#9B5C00;--status-error:#A52A2A;--status-neutral:#5F6670;--status-human:#6B4EA0;
       --shadow-current:0 12px 32px rgba(98,53,22,.12);
       --space-1:4px;--space-2:8px;--space-3:12px;--space-4:16px;--space-5:20px;--space-6:24px;
       --space-8:32px;--space-10:40px;--space-12:48px;--space-16:64px;
@@ -63,13 +63,13 @@
     .candidate-grid--spaced{margin-block-start:var(--space-5)}
     .card--current{border-color:var(--accent-primary);box-shadow:var(--shadow-current)}
     .card--excluded{color:var(--text-muted);background:var(--surface-page)}
-    .card--excluded h3{text-decoration:line-through}
     .meta{font-size:.75rem;font-weight:700;color:var(--text-muted);overflow-wrap:anywhere}
     .badges,.filters{display:flex;flex-wrap:wrap;gap:var(--space-2);margin-block:var(--space-4)}
     .badge{display:inline-flex;align-items:center;min-block-size:32px;padding:var(--space-1) var(--space-3);border-radius:var(--radius-control);background:var(--surface-warm);font-size:.875rem;font-weight:700}
     .badge[data-tone="success"]{color:var(--status-success)}
     .badge[data-tone="warning"]{color:var(--status-warning)}
     .badge[data-tone="error"]{color:var(--status-error)}
+    .badge[data-tone="neutral"]{color:var(--status-neutral)}
     .badge[data-tone="human"]{color:var(--status-human)}
     .signals{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(12rem,100%),1fr));gap:var(--space-2);margin-block-start:var(--space-5)}
     .signal{padding:var(--space-3);border-radius:var(--radius-control);background:var(--surface-page);font-size:.875rem}
@@ -99,6 +99,12 @@
     .map-lane strong{word-break:keep-all}
     .map-items{display:flex;flex-wrap:wrap;gap:var(--space-2)}
     .map-item{padding:var(--space-2) var(--space-3);border-radius:var(--radius-control);background:var(--surface-warm);font-size:.875rem;word-break:keep-all}
+    .journey{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--space-3);margin-block-end:var(--space-6)}
+    .journey-step{min-inline-size:0;min-block-size:9rem;padding:var(--space-5);border:1px solid var(--border-default);border-radius:var(--radius-card);background:var(--surface-paper);color:var(--text-primary);text-align:start;cursor:pointer}
+    .journey-step:hover{border-color:var(--accent-primary);background:var(--surface-warm)}
+    .journey-step__no{display:block;color:var(--accent-primary);font-size:.75rem;font-weight:700}
+    .journey-step strong{display:block;margin-block:var(--space-2);font-size:1.5rem;font-variant-numeric:tabular-nums}
+    .journey-step span:last-child{display:block;color:var(--text-secondary);font-size:.875rem;word-break:keep-all}
     .discussion{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(16rem,.7fr);gap:var(--space-6)}
     .verdict{padding:var(--space-8);background:var(--surface-dark);color:var(--surface-paper);border-radius:var(--radius-region)}
     .verdict h3{margin:0;font-size:1.5rem;word-break:keep-all}
@@ -117,6 +123,7 @@
       .role{grid-column:2;justify-self:start;text-align:start}
       .discussion{grid-template-columns:1fr}
       .map-lane{grid-template-columns:1fr}
+      .journey{grid-template-columns:repeat(2,minmax(0,1fr))}
     }
     @media (max-width:480px){
       .hero{padding-block-start:var(--space-8)}
@@ -126,6 +133,8 @@
       .parent-lock .badge{margin-block-start:var(--space-3)}
       .glossary dl{grid-template-columns:1fr;gap:var(--space-1)}
       .glossary dd{margin-block-end:var(--space-4)}
+      .journey{grid-template-columns:1fr}
+      .journey-step{min-block-size:auto}
     }
     @media print{
       .progress,.pager,.filters,.skip-link{display:none!important}
@@ -141,8 +150,9 @@
   <a class="skip-link" href="#main">본문으로 바로가기</a>
   <header class="hero">
     <div class="hero__inner">
-      <p class="eyebrow">업무 후보 선정 · 팀 토의용</p>
+      <p class="eyebrow">디자인 캠프 해설 코치 · LV5 선택</p>
       <h1 id="hero-title">업무를 한 단계씩 살펴봅니다</h1>
+      <p>디자인 캠프 결과물을 확인하고, 다음 단계에서 에이전트와 스킬로 다시 설계할 LV5 업무를 골라보세요.</p>
       <div class="hero__meta" id="hero-meta"></div>
     </div>
   </header>
@@ -171,14 +181,18 @@
     'use strict';
     const data=JSON.parse(document.getElementById('moderator-data').textContent);
     const pages=['intro','overview','lv4','lv5','lv6','final'];
-    const state={page:'intro',lv4:0,lv5:0,filter:'all'};
+    const state={page:'intro',lv4:0,lv5:0,lv5View:'all',filter:'all'};
     const roleLabels={ai:'AI 처리',assisted:'AI 보조 + 사람 판단',human_input:'사람이 준비',integration:'시스템 연결 필요',human_final:'사람이 최종 책임'};
     const roleGroups={all:['ai','assisted','human_input','integration','human_final'],ai:['ai','assisted'],human:['human_input','human_final'],integration:['integration']};
     const signalLabels={met:'충족',unmet:'미충족',unknown:'미확인'};
-    const statusMeta={green:['추천 후보','success'],yellow:['확인 후 후보','warning'],red:['대안 검토','error'],excluded:['후보 제외','error']};
+    const statusMeta={green:['해설 코치 기준 충족','success'],yellow:['추가 확인','warning'],red:['다른 방식 함께 검토','neutral'],excluded:['현재 우선 검토 아님','neutral']};
+    const sourceMeta={recommended:'원본 AI 전환 추천',not_recommended:'원본 추천 아님',unknown:'원본 추천 여부 미확인'};
     const esc=(v)=>String(v??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
     const currentLv4=()=>data.lv4s[state.lv4];
-    const currentLv5=()=>currentLv4()?.lv5s[state.lv5];
+    const allLv5=()=>data.lv4s.flatMap(lv4=>lv4.lv5s.map(lv5=>({lv4,lv5})));
+    const visibleLv5=()=>allLv5().filter(({lv5})=>state.lv5View==='all'||(state.lv5View==='source'&&lv5.sourceRecommendation==='recommended')||(state.lv5View==='moderator'&&lv5.eligible)||(state.lv5View==='followup'&&lv5.status==='yellow'));
+    const currentLv5Entry=()=>visibleLv5()[state.lv5];
+    const currentLv5=()=>currentLv5Entry()?.lv5;
     const selectedLv5=()=>data.lv4s.flatMap(item=>item.lv5s).find(item=>item.id===data.selection?.selectedLv5Id);
     const countRoles=(lv5)=>lv5.lv6s.reduce((acc,item)=>{acc[item.role]=(acc[item.role]||0)+1;return acc},{ai:0,assisted:0,human_input:0,integration:0,human_final:0});
     const pageHead=(kicker,title,lead,pager='')=>`<div class="page-head"><div><p class="page-kicker">${esc(kicker)}</p><h2>${esc(title)}</h2><p class="lead">${esc(lead)}</p></div>${pager}</div>`;
@@ -186,7 +200,7 @@
     const badges=(lv5)=>{
       const meta=statusMeta[lv5.eligible?lv5.status:'excluded'];
       const override=lv5.candidateOverrideReason?`<span class="badge" data-tone="warning">팀 재검토 · ${esc(lv5.candidateOverrideReason)}</span>`:'';
-      return `<div class="badges"><span class="badge" data-tone="${meta[1]}">${meta[0]}</span><span class="badge">Pain Point ${esc(lv5.painPoints.count)} · 업무상 불편 정도 ${esc(lv5.painPoints.severity)}</span><span class="badge">AI 전환 추천 ${esc(lv5.aiRecommendationCount)}</span>${override}</div>`;
+      return `<div class="badges"><span class="badge">${esc(sourceMeta[lv5.sourceRecommendation])}</span><span class="badge" data-tone="${meta[1]}">${meta[0]}</span><span class="badge">Pain Point ${esc(lv5.painPoints.count)} · 업무상 불편 정도 ${esc(lv5.painPoints.severity)}</span><span class="badge">AI 전환 추천 근거 ${esc(lv5.aiRecommendationCount)}</span>${override}</div>`;
     };
     function renderIntro(){
       const glossary=data.glossary.map(item=>`<dt>${esc(item.term)}</dt><dd>${esc(item.meaning)}</dd>`).join('');
@@ -195,8 +209,11 @@
     function renderOverview(){
       const groups=new Map();
       data.lv4s.forEach(item=>{if(!groups.has(item.lv3))groups.set(item.lv3,[]);groups.get(item.lv3).push(item)});
-      const lanes=[...groups].map(([lv3,items])=>`<div class="map-lane"><strong>${esc(lv3)}<span class="meta"> · 업무 영역(LV3)</span></strong><div class="map-items">${items.map(item=>`<span class="map-item">${esc(item.name)} · 후보 ${item.lv5s.filter(v=>v.eligible).length}</span>`).join('')}</div></div>`).join('');
-      document.getElementById('page-overview').innerHTML=pageHead('02 · 전체','전체 업무 지도','업무 영역별 프로세스와 후보 수를 먼저 비교합니다.')+`<div class="paper">${lanes}</div>`;
+      const items=allLv5();
+      const steps=[['lv4','', '전체 프로세스(LV4)',data.lv4s.length,'업무 구조를 먼저 봅니다.'],['lv5','all','전체 후보 업무(LV5)',items.length,'원본 업무를 빠짐없이 봅니다.'],['lv5','source','원본 AI 전환 추천',items.filter(({lv5})=>lv5.sourceRecommendation==='recommended').length,'기존 추천 결과만 따로 봅니다.'],['lv5','moderator','해설 코치 기준 충족',items.filter(({lv5})=>lv5.eligible).length,'선정 기준을 통과한 업무를 봅니다.']];
+      const journey=steps.map(([page,view,label,count,help],index)=>`<button type="button" class="journey-step" ${page==='lv4'?'data-journey-page="lv4"':`data-lv5-view="${view}"`} aria-label="${esc(label)} ${count}개 보기"><span class="journey-step__no">0${index+1}</span><strong>${count}</strong><span>${esc(label)}<br>${esc(help)}</span></button>`).join('');
+      const lanes=[...groups].map(([lv3,group])=>`<div class="map-lane"><strong>${esc(lv3)}<span class="meta"> · 업무 영역(LV3)</span></strong><div class="map-items">${group.map(item=>`<span class="map-item">${esc(item.name)} · 업무 ${item.lv5s.length}</span>`).join('')}</div></div>`).join('');
+      document.getElementById('page-overview').innerHTML=pageHead('02 · 전체','전체 업무 지도','원본 추천과 해설 코치 판단을 섞지 않고 네 단계로 살펴봅니다.')+`<div class="journey" aria-label="4단계 업무 탐색">${journey}</div><div class="paper">${lanes}</div>`;
     }
     function renderLv4(){
       const item=currentLv4();
@@ -206,11 +223,12 @@
       document.getElementById('page-lv4').innerHTML=pageHead('03 · 프로세스','프로세스 보기 · LV4',`${item.lv3} 아래의 프로세스를 한 개씩 살펴봅니다.`,pager('프로세스',state.lv4,data.lv4s.length))+`<article class="paper card--current"><span class="meta">${esc(item.id)} · 프로세스(LV4)</span><h3>${esc(item.name)}</h3><div class="summary-grid"><p><strong>${esc(item.frequency)}</strong><br>반복 주기</p><p><strong>${candidates}</strong><br>선택 가능한 후보</p><p><strong>${aiTasks}</strong><br>AI 처리·보조 세부 업무</p></div></article><div class="candidate-grid candidate-grid--spaced">${cards}</div>`;
     }
     function renderLv5(){
-      const lv4=currentLv4();const item=currentLv5();
-      if(!item){document.getElementById('page-lv5').innerHTML='<div class="empty">이 프로세스에는 후보 업무가 없습니다.</div>';return}
+      const entry=currentLv5Entry();const lv4=entry?.lv4;const item=entry?.lv5;const list=visibleLv5();
+      if(!item){document.getElementById('page-lv5').innerHTML='<div class="empty">이 보기 조건에 해당하는 업무가 없습니다.</div>';return}
       const signals=Object.entries(item.signals).map(([name,value])=>`<div class="signal"><strong>${esc(name)}</strong>${esc(signalLabels[value])}</div>`).join('');
       const roles=countRoles(item);const aiScope=roles.ai+roles.assisted;
-      document.getElementById('page-lv5').innerHTML=pageHead('04 · 후보','후보 업무 보기 · LV5',`${lv4.name} 안의 후보를 한 개씩 비교합니다.`,pager('후보 업무',state.lv5,lv4.lv5s.length))+`<article class="card card--current ${item.eligible?'':'card--excluded'}"><span class="meta">부모 ${esc(lv4.id)} · ${esc(lv4.name)}</span><h3>${esc(item.name)} <span class="meta">${esc(item.id)}</span></h3>${badges(item)}<p>${esc(item.evidence)}</p><div class="signals">${signals}</div><p class="notice">원 업무 ${item.lv6s.length}개 중 AI 처리·보조 범위는 ${aiScope}개입니다. 사람이 맡는 시작·종료 단계는 후보 수에서 빼되 흐름에는 남깁니다.</p></article>`;
+      const views=[['all','전체 LV5'],['source','원본 AI 전환 추천'],['moderator','모더레이터 기준 충족'],['followup','추가 확인']].map(([value,label])=>`<button type="button" class="filter" data-lv5-view="${value}" aria-pressed="${state.lv5View===value}">${label}</button>`).join('');
+      document.getElementById('page-lv5').innerHTML=pageHead('04 · 후보','후보 업무 보기 · LV5','원본 추천과 모더레이터 판단을 분리해 보고 팀이 하나를 고릅니다.',pager('후보 업무',state.lv5,list.length))+`<div class="filters" aria-label="후보 업무 보기 조건">${views}</div><article class="card card--current ${item.eligible?'':'card--excluded'}"><span class="meta">부모 ${esc(lv4.id)} · ${esc(lv4.name)}</span><h3>${esc(item.name)} <span class="meta">${esc(item.id)}</span></h3>${badges(item)}<p>${esc(item.evidence)}</p><div class="signals">${signals}</div><p class="notice">원 업무 ${item.lv6s.length}개 중 AI 처리·보조 범위는 ${aiScope}개입니다. 사람이 맡는 시작·종료 단계는 자동화 수에서 빼되 원본 흐름에는 그대로 남깁니다.</p></article>`;
     }
     function renderLv6(){
       const item=currentLv5();
@@ -222,9 +240,11 @@
     function renderFinal(){
       const item=selectedLv5()||currentLv5();
       const verdict=data.selection?.finalized?data.selection.verdict:'판정 전';
-      const condition=data.selection?.finalized?data.selection.condition:'팀이 후보를 고르고 확인할 항목과 가치를 대화한 뒤 판정합니다.';
+      const condition=data.selection?.finalized?data.selection.condition:'팀이 후보를 하나 고른 뒤에만 가치와 조건을 확인하고 판정합니다.';
       const roles=item?countRoles(item):{human_input:0,human_final:0,integration:0};
-      document.getElementById('page-final').innerHTML=pageHead('06 · 결정','팀 최종 토의','코치의 판정은 참고입니다. 실제 구축 범위와 책임은 팀과 조직이 결정합니다.')+`<div class="discussion"><article class="verdict"><span class="meta">${item?esc(item.id):'선택 전'}</span><h3>${item?esc(item.name):'아직 선택한 후보가 없습니다'}</h3><p class="verdict__value">${esc(verdict)}</p><p>${esc(condition)}</p></article><article class="paper"><h3>토의할 경계</h3><ul class="decision-list"><li>사람이 준비하는 단계 ${roles.human_input}개</li><li>시스템 연결이 필요한 단계 ${roles.integration}개</li><li>사람이 최종 책임지는 단계 ${roles.human_final}개</li><li>알림·제출·승인·지급은 사람의 최종 확인 전 실행하지 않음</li></ul></article></div><p class="notice">※ 이 트리는 교육 과정의 참고용 판단입니다. 실제 구축 여부·범위의 최종 결정과 책임은 팀과 조직에 있습니다.</p>`;
+      const reason=data.selection?.finalized?`<p><strong>팀 선택 이유</strong><br>${esc(data.selection.selectionReason)}</p>`:'';
+      const override=data.selection?.overrideReason?`<p><strong>예외 선택 이유</strong><br>${esc(data.selection.overrideReason)}</p>`:'';
+      document.getElementById('page-final').innerHTML=pageHead('06 · 결정','팀 최종 토의','코치의 판정은 참고입니다. 실제 구축 범위와 책임은 팀과 조직이 결정합니다.')+`<div class="discussion"><article class="verdict"><span class="meta">${item?esc(item.id):'선택 전'}</span><h3>${item?esc(item.name):'아직 선택한 후보가 없습니다'}</h3><p class="verdict__value">${esc(verdict)}</p><p>${esc(condition)}</p>${reason}${override}</article><article class="paper"><h3>토의할 경계</h3><ul class="decision-list"><li>사람이 준비하는 단계 ${roles.human_input}개</li><li>시스템 연결이 필요한 단계 ${roles.integration}개</li><li>사람이 최종 책임지는 단계 ${roles.human_final}개</li><li>알림·제출·승인·지급은 사람의 최종 확인 전 실행하지 않음</li></ul></article></div><p class="notice">※ 이 트리는 교육 과정의 참고용 판단입니다. 실제 구축 여부·범위의 최종 결정과 책임은 팀과 조직에 있습니다.</p>`;
     }
     function render(){renderIntro();renderOverview();renderLv4();renderLv5();renderLv6();renderFinal();activate(state.page,false)}
     function focusPager(kind,direction){
@@ -241,7 +261,9 @@
     }
     document.addEventListener('click',event=>{
       const pageButton=event.target.closest('[data-page]');if(pageButton){activate(pageButton.dataset.page);return}
-      const pageMove=event.target.closest('[data-pager]');if(pageMove){const kind=pageMove.dataset.pager;const direction=Number(pageMove.dataset.dir);if(kind==='프로세스'){state.lv4=Math.max(0,Math.min(data.lv4s.length-1,state.lv4+direction));state.lv5=0}else{state.lv5=Math.max(0,Math.min(currentLv4().lv5s.length-1,state.lv5+direction))}render();focusPager(kind,direction);return}
+      const pageMove=event.target.closest('[data-pager]');if(pageMove){const kind=pageMove.dataset.pager;const direction=Number(pageMove.dataset.dir);if(kind==='프로세스'){state.lv4=Math.max(0,Math.min(data.lv4s.length-1,state.lv4+direction))}else{state.lv5=Math.max(0,Math.min(visibleLv5().length-1,state.lv5+direction))}render();focusPager(kind,direction);return}
+      const journeyPage=event.target.closest('[data-journey-page]');if(journeyPage){activate(journeyPage.dataset.journeyPage);return}
+      const lv5View=event.target.closest('[data-lv5-view]');if(lv5View){state.lv5View=lv5View.dataset.lv5View;state.lv5=0;renderLv5();renderLv6();renderFinal();activate('lv5');document.querySelector(`#page-lv5 [data-lv5-view="${state.lv5View}"]`)?.focus();return}
       const filter=event.target.closest('[data-filter]');if(filter){state.filter=filter.dataset.filter;renderLv6();document.querySelector(`[data-filter="${state.filter}"]`)?.focus();return}
     });
     document.querySelector('[role="tablist"]').addEventListener('keydown',event=>{

@@ -7,6 +7,7 @@ const HUMAN_VALUES = ['자동', '증강', '사람고유'];
 const ENGINE_VALUES = ['자동화', '스킬', '사람'];
 const WRAP_VALUES = ['개인용', '여러사람_미니앱', '여러사람_공유만'];
 const GATE_VALUES = ['충족', '미충족', '미확인'];
+const SOURCE_RECOMMENDATION_VALUES = ['recommended', 'not_recommended', 'unknown'];
 const ROLE_ATF_VALUES = {
   ai: ['자동', '스킬'],
   assisted: ['증강', '스킬'],
@@ -100,6 +101,7 @@ export function validateModeratorData(value) {
       if (lv5Ids.has(lv5.id)) fail(`중복 LV5 ID: ${lv5.id}`);
       lv5Ids.add(lv5.id);
       if (typeof lv5.eligible !== 'boolean') fail(`${path}.eligible은 불리언이어야 합니다.`);
+      requireOneOf(lv5.sourceRecommendation, SOURCE_RECOMMENDATION_VALUES, `${path}.sourceRecommendation`);
       requireOneOf(lv5.status, STATUS_VALUES, `${path}.status`);
       requireObject(lv5.painPoints, `${path}.painPoints`);
       requireInteger(lv5.painPoints.count, `${path}.painPoints.count`);
@@ -152,6 +154,8 @@ export function validateModeratorData(value) {
   }
   requireString(value.selection.selectedLv5Id, 'selection.selectedLv5Id');
   if (!lv5Ids.has(value.selection.selectedLv5Id)) fail('선택한 LV5가 트리에 없습니다.');
+  if (value.selection.confirmedByTeam !== true) fail('판정 완료에는 팀 선택 확인이 필요합니다.');
+  requireString(value.selection.selectionReason, 'selection.selectionReason');
   requireOneOf(value.selection.verdict, VERDICT_VALUES, 'selection.verdict');
   requireString(value.selection.condition, 'selection.condition');
   validateAtfData(value.atfData);
@@ -161,6 +165,9 @@ export function validateModeratorData(value) {
   const selected = value.lv4s
     .flatMap(lv4 => lv4.lv5s.map(lv5 => ({ lv4, lv5 })))
     .find(item => item.lv5.id === value.selection.selectedLv5Id);
+  if (!selected.lv5.eligible || ['red', 'excluded'].includes(selected.lv5.status)) {
+    requireString(value.selection.overrideReason, 'selection.overrideReason');
+  }
   const expectedProcess = `${selected.lv4.name} › ${selected.lv5.name}`;
   if (value.atfData.process !== expectedProcess) fail('atfData.process가 선택한 LV4·LV5와 다릅니다.');
   if (value.atfData.targetTask.no !== 1 || value.atfData.targetTask.name !== selected.lv5.name) {
