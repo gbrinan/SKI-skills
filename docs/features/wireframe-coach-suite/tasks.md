@@ -7,7 +7,7 @@ paperthin·file-based-planning 철학으로 설계해 저장소에 등록한다.
 
 ## Current Phase
 
-✅ Phase 4: Testing (문서 검증)
+🚧 Phase 5: Moderator v1.4 UI (구현·검증)
 
 ## Phases
 
@@ -35,3 +35,15 @@ paperthin·file-based-planning 철학으로 설계해 저장소에 등록한다.
 
 - [x] 산출물 계약 자체 검증 (프론트매터, 계약 규칙, 상태 블록 왕복)
 - [x] 커밋 및 푸시
+
+### Phase 5: Moderator v1.4 UI 🚧
+
+- [x] 회계관리팀 v7 참고 HTML에서 색·위계·페이지 흐름 추출
+- [x] `DESIGN.md` 작성
+- [x] 6페이지 데이터 기반 HTML 템플릿과 렌더러 구현
+- [x] 사람이 준비·연동·최종 책임지는 역할 분류 구현
+- [x] 비IT용 쉬운 용어와 화면 약어 금지 validator 구현
+- [x] 경영전략팀 가상 데이터와 판정 완료 예시 생성
+- [x] 판정 전/완료, 사람 업무 제외, 약어 부정 테스트 통과
+- [ ] 375/768/1280 실제 브라우저 시각 QA
+- [ ] 커밋·푸시·PR
