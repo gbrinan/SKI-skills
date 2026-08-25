@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>To-Be 와이어프레임 - 계정별 잔액 확인</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Malgun Gothic','맑은 고딕',sans-serif; background:#F4F5FA; color:#222A45; padding:28px 36px; }
+  .hdr { background:#222A45; color:#fff; border-radius:10px; padding:18px 24px; margin-bottom:18px; }
+  .hdr h1 { font-size:20px; margin-bottom:4px; }
+  .hdr .meta { font-size:12px; opacity:.85; }
+  .card { background:#fff; border-radius:10px; padding:18px 22px; margin-bottom:16px; box-shadow:0 1px 4px rgba(34,42,69,.08); }
+  .card h2 { font-size:15px; color:#3346FF; margin-bottom:10px; }
+  table { border-collapse:collapse; width:100%; font-size:12.5px; }
+  th { background:#222A45; color:#fff; padding:7px 9px; text-align:left; font-weight:normal; }
+  td { border-bottom:1px solid #E4E6F0; padding:7px 9px; vertical-align:top; line-height:1.5; }
+  .sk { border-left:4px solid #3346FF; background:#F7F8FF; border-radius:6px; padding:10px 14px; margin-bottom:8px; font-size:13px; }
+  .sk b { color:#3346FF; }
+  .note { font-size:11.5px; color:#6a7090; margin-top:8px; }
+</style>
+</head>
+<body>
+<div class="hdr">
+  <h1>To-Be 와이어프레임 - [Lv.5 액티비티] 계정별 잔액 확인</h1>
+  <div class="meta">재무본부 회계관리팀 · 상위 [Lv.4 프로세스] 분기/반기 결산 · 에이전트, 스킬 설계 코치 · 2026-08-26 · 본선 노드 7개</div>
+</div>
+
+<div class="card">
+<h2>① To-Be 와이어프레임 (가로 트리)</h2>
+<pre class="mermaid">
+flowchart LR
+  N1["📥 잔액·계열사 파일 수집"]:::mcpread --> N2["🧠 표준 잔액표 생성"]:::codex
+  N2 --> N3["🧠 전기 대비 변화 계산"]:::codex
+  N3 --> N4{"🧠 이상 잔액 판정 (±10% 기준)"}:::codex
+  N4 --> N5["👤 이상 원인 확인·판단"]:::human
+  N5 --> N6["📤 검토 브리핑 초안 저장"]:::mcpwrite
+  N6 --> N7["👤 최종 검토·팀 공유"]:::human
+  N1 -.-> E1["📤 누락 계열사 재요청 초안"]:::mcpwrite
+  E1 -.-> E2["👤 재요청 발송"]:::human
+  S1["🚧 SAP 원장 직접 연동"]:::api -.-> N1
+  classDef codex fill:#EDEFFF,stroke:#3346FF,color:#222A45;
+  classDef mcpread fill:#E4F6E9,stroke:#157A3C,color:#222A45;
+  classDef mcpwrite fill:#FFF4D6,stroke:#9A6B00,color:#222A45;
+  classDef api fill:#F0F1F4,stroke:#8a90a5,color:#6a7090,stroke-dasharray:4 3;
+  classDef human fill:#FBE3E3,stroke:#B02B2B,color:#222A45;
+</pre>
+<div class="note">사내망에서 트리가 안 보이면 아래 표로 확인하세요.</div>
+</div>
+
+<div class="card">
+<h2>② 노드 상세</h2>
+<table>
+<tr><th>노드</th><th>환경</th><th>방식</th><th>판단 기준</th><th>예외</th></tr>
+<tr><td>1. 잔액·계열사 파일 수집</td><td>📥 회사 자료 읽기</td><td>스킬</td><td>공유폴더의 원장잔액_{분기}.xlsx와 계열사잔액_*.xlsx를 모두 읽는다</td><td>계열사 파일 누락 시 재요청 초안 작성(발송은 사람)</td></tr>
+<tr><td>2. 표준 잔액표 생성</td><td>🧠 이노허브</td><td>스킬</td><td>계정코드 기준으로 원장·계열사 잔액을 한 표로 병합한다</td><td>계정코드 불일치 시 미매칭 목록으로 분리</td></tr>
+<tr><td>3. 전기 대비 변화 계산</td><td>🧠 이노허브</td><td>스킬</td><td>계정별 (당기-전기)/전기 증감률을 계산한다</td><td>전기 값 0이면 증감률 대신 '신규' 표기</td></tr>
+<tr><td>4. 이상 잔액 판정</td><td>🧠 이노허브</td><td>스킬</td><td>만약 증감률이 ±10% 초과이거나 부호가 반전되면 이상 후보로 표시한다</td><td>판정 애매(±10% 경계)면 후보에 넣고 사람 확인으로 넘긴다</td></tr>
+<tr><td>5. 이상 원인 확인·판단</td><td>👤 사람</td><td>사람</td><td>결산담당이 이상 후보의 원인을 확인하고 확정/해제한다</td><td>원인 불명이면 계열사 담당에 질의</td></tr>
+<tr><td>6. 검토 브리핑 초안 저장</td><td>📤 회사 도구에 저장</td><td>스킬</td><td>확정 결과를 표+요약 3줄로 개인 OneDrive에 저장, 팀장 앞 메일 초안 생성(발송하지 않음)</td><td>저장 실패 시 채팅으로 본문 출력</td></tr>
+<tr><td>7. 최종 검토·팀 공유</td><td>👤 사람</td><td>사람</td><td>결산담당이 초안을 검토 후 직접 발송·공유한다</td><td>-</td></tr>
+<tr><td>(참고) SAP 원장 직접 연동</td><td>🚧 연결 준비 중</td><td>-</td><td>-</td><td>오늘 실행 불가 - 사람이 SAP에서 엑셀 추출해 공유폴더에 둔다</td></tr>
+</table>
+</div>
+
+<div class="card">
+<h2>③ 스킬 추천 (3개 · 노드 7개 기준)</h2>
+<div class="sk"><b>추천 1. 잔액표준화기 (balance-normalizer)</b> (우선) - 원장·계열사 잔액 엑셀을 받아 계정코드 기준 표준 잔액표를 만드는 스킬. 근거: PP-6(수신 지연·품질 편차)의 취합 부담 직접 해소, 오늘 환경(📥+🧠)에서 바로 실행 가능. [노드 1~2]</div>
+<div class="sk"><b>추천 2. 이상잔액플래거 (anomaly-flagger)</b> - 표준 잔액표를 받아 ±10% 기준 이상 후보 목록을 만드는 스킬. 근거: 이상치 식별의 기준 명문화(속인화 방지), 사람 판단은 확정만. [노드 3~4]</div>
+<div class="sk"><b>추천 3. 잔액브리핑초안기 (balance-briefing-drafter)</b> - 확정 결과를 받아 검토 브리핑과 팀장 앞 메일 초안을 만드는 스킬. 근거: 보고 반복 부담(PP-8 유사) 절감, 발송 앞 사람 확인 구조. [노드 6]</div>
+</div>
+
+<div class="card">
+<h2>④ 상태 블록</h2>
+<pre style="font-size:12px; background:#F7F8FF; padding:12px; border-radius:6px;">
+@@STATE@@
+단계: 와이어프레임완료
+담당: 결산담당
+Lv5: [Lv.5 액티비티] 계정별 잔액 확인
+판정(선정단계): 권장
+노드: 잔액·계열사 파일 수집[📥] → 표준 잔액표 생성[🧠] → 전기 대비 변화 계산[🧠] → 이상 잔액 판정[🧠] → 이상 원인 확인·판단[👤] → 검토 브리핑 초안 저장[📤] → 최종 검토·팀 공유[👤]
+휴먼: 이상 원인 확정 · 재요청 발송 · 최종 검토·공유
+예외: 계열사 파일 누락(재요청 초안) / 계정코드 미매칭(별도 목록) / 경계값 애매(사람 확인)
+판단기준: 만약 증감률 ±10% 초과 또는 부호 반전이면 이상 후보로 표시한다 / 전기 0이면 신규 표기 / 발송·공유는 사람만 한다
+추천스킬: 1.잔액표준화기(잔액 엑셀→표준 잔액표) 2.이상잔액플래거(표준 잔액표→이상 후보 목록) 3.잔액브리핑초안기(확정 결과→브리핑·메일 초안)
+참가자결정: -
+다음할일: 제작 세션에서 추천스킬 1부터 작성
+@@END@@
+</pre>
+</div>
+<div class="note">※ 이 설계는 교육 과정의 참고용입니다. 실제 적용 여부·범위의 최종 결정과 책임은 팀과 조직에 있습니다.</div>
+<script>mermaid.initialize({startOnLoad:true, theme:'neutral'});</script>
+</body>
+</html>
