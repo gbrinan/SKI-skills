@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="팀이 프로세스와 후보 업무를 단계별로 살펴보고 AI 에이전트 후보를 토의하는 모더레이터 보드">
+  <title>업무 후보 선정 보드</title>
+  <style>
+    :root {
+      --surface-page:#FFF9F1;--surface-paper:#FFFFFF;--surface-warm:#FFF0DD;--surface-dark:#2B211B;
+      --text-primary:#2B211B;--text-secondary:#6F6259;--text-muted:#8C8179;--border-default:#E8D8C8;
+      --accent-primary:#C84F13;--accent-hover:#A93F0A;--focus-ring:#0B63CE;--status-success:#166B3B;
+      --status-warning:#9B5C00;--status-error:#A52A2A;--status-human:#6B4EA0;
+      --shadow-current:0 12px 32px rgba(98,53,22,.12);
+      --space-1:4px;--space-2:8px;--space-3:12px;--space-4:16px;--space-5:20px;--space-6:24px;
+      --space-8:32px;--space-10:40px;--space-12:48px;--space-16:64px;
+      --radius-control:10px;--radius-card:14px;--radius-region:20px;
+      --duration-micro:100ms;--duration-standard:180ms;
+    }
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{margin:0;background:var(--surface-page);color:var(--text-primary);font-family:"Malgun Gothic","Apple SD Gothic Neo",system-ui,sans-serif;font-size:1rem;line-height:1.65}
+    button{font:inherit}
+    button:focus-visible,a:focus-visible{outline:3px solid var(--focus-ring);outline-offset:3px}
+    button:active{transform:translateY(1px)}
+    .skip-link{position:fixed;inset-block-start:var(--space-2);inset-inline-start:var(--space-2);z-index:3;background:var(--surface-paper);color:var(--text-primary);padding:var(--space-3) var(--space-4);transform:translateY(-160%)}
+    .skip-link:focus{transform:none}
+    .hero{background:var(--surface-dark);color:var(--surface-paper);padding:var(--space-10) clamp(1rem,4vw,3rem) var(--space-8)}
+    .hero__inner,.shell{max-inline-size:1200px;margin-inline:auto}
+    .eyebrow{margin:0 0 var(--space-2);font-size:.75rem;font-weight:700;letter-spacing:.04em;color:var(--surface-warm)}
+    .hero h1{max-inline-size:18ch;margin:0;font-size:clamp(2rem,5vw,3.5rem);line-height:1.12;letter-spacing:-.03em;text-wrap:balance;word-break:keep-all}
+    .hero__meta{display:flex;flex-wrap:wrap;gap:var(--space-2) var(--space-5);margin-block-start:var(--space-5);color:var(--surface-warm);font-size:.875rem}
+    .progress{position:sticky;inset-block-start:0;z-index:2;background:color-mix(in srgb,var(--surface-page) 94%,transparent);border-block-end:1px solid var(--border-default);backdrop-filter:blur(10px)}
+    .progress__inner{display:flex;gap:var(--space-2);max-inline-size:1200px;margin-inline:auto;padding:var(--space-3) clamp(1rem,4vw,3rem);overflow-x:auto;scrollbar-width:thin}
+    .progress button{min-block-size:44px;min-inline-size:max-content;border:0;border-radius:var(--radius-control);background:transparent;color:var(--text-secondary);padding:var(--space-2) var(--space-4);cursor:pointer;transition:color var(--duration-standard) ease-out,background-color var(--duration-standard) ease-out}
+    .progress button:hover{color:var(--text-primary);background:var(--surface-warm)}
+    .progress button[aria-selected="true"]{background:var(--accent-primary);color:var(--surface-paper);font-weight:700}
+    .step-no{font-size:.75rem;font-weight:700;margin-inline-end:var(--space-2)}
+    .shell{padding:var(--space-10) clamp(1rem,4vw,3rem) var(--space-16)}
+    .page[hidden]{display:none}
+    .page{animation:fade-in var(--duration-standard) ease-out}
+    @keyframes fade-in{from{opacity:0}to{opacity:1}}
+    .page-head{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:end;gap:var(--space-6);margin-block-end:var(--space-8)}
+    .page-kicker{margin:0 0 var(--space-2);color:var(--accent-primary);font-size:.75rem;font-weight:700}
+    .page h2{margin:0;font-size:clamp(1.75rem,4vw,2.5rem);line-height:1.2;letter-spacing:-.02em;text-wrap:balance;word-break:keep-all}
+    .lead{max-inline-size:65ch;margin:var(--space-4) 0 0;color:var(--text-secondary);font-size:1.0625rem;font-weight:500;word-break:keep-all}
+    .pager{display:grid;grid-template-columns:44px minmax(8rem,auto) 44px;align-items:center;gap:var(--space-2)}
+    .pager button{inline-size:44px;block-size:44px;border:1px solid var(--border-default);border-radius:var(--radius-control);background:var(--surface-paper);color:var(--text-primary);cursor:pointer}
+    .pager button:hover:not(:disabled){border-color:var(--accent-primary);color:var(--accent-primary)}
+    .pager button:disabled{color:var(--text-muted);cursor:not-allowed;opacity:.55}
+    .pager__label{text-align:center;font-size:.875rem;color:var(--text-secondary);font-variant-numeric:tabular-nums}
+    .paper{background:var(--surface-paper);border:1px solid var(--border-default);border-radius:var(--radius-region);padding:clamp(1rem,4vw,2rem)}
+    .intro-grid,.summary-grid,.map-grid,.candidate-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(17rem,100%),1fr));gap:var(--space-5)}
+    .guide{padding:var(--space-6);border-inline-start:4px solid var(--accent-primary);background:var(--surface-warm);border-radius:0 var(--radius-card) var(--radius-card) 0}
+    .guide h3,.card h3{margin:0 0 var(--space-2);font-size:1.125rem;line-height:1.4;word-break:keep-all}
+    .guide p,.card p{margin:0;color:var(--text-secondary);word-break:keep-all}
+    .glossary{margin-block-start:var(--space-8)}
+    .glossary h3{font-size:1.5rem;margin:0 0 var(--space-4)}
+    .glossary dl{display:grid;grid-template-columns:minmax(9rem,14rem) minmax(0,1fr);gap:var(--space-3) var(--space-6);margin:0}
+    .glossary dt{font-weight:700}
+    .glossary dd{margin:0;color:var(--text-secondary)}
+    .card{min-inline-size:0;padding:var(--space-6);border:1px solid var(--border-default);border-radius:var(--radius-card);background:var(--surface-paper)}
+    .candidate-grid--spaced{margin-block-start:var(--space-5)}
+    .card--current{border-color:var(--accent-primary);box-shadow:var(--shadow-current)}
+    .card--excluded{color:var(--text-muted);background:var(--surface-page)}
+    .card--excluded h3{text-decoration:line-through}
+    .meta{font-size:.75rem;font-weight:700;color:var(--text-muted);overflow-wrap:anywhere}
+    .badges,.filters{display:flex;flex-wrap:wrap;gap:var(--space-2);margin-block:var(--space-4)}
+    .badge{display:inline-flex;align-items:center;min-block-size:32px;padding:var(--space-1) var(--space-3);border-radius:var(--radius-control);background:var(--surface-warm);font-size:.875rem;font-weight:700}
+    .badge[data-tone="success"]{color:var(--status-success)}
+    .badge[data-tone="warning"]{color:var(--status-warning)}
+    .badge[data-tone="error"]{color:var(--status-error)}
+    .badge[data-tone="human"]{color:var(--status-human)}
+    .signals{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(12rem,100%),1fr));gap:var(--space-2);margin-block-start:var(--space-5)}
+    .signal{padding:var(--space-3);border-radius:var(--radius-control);background:var(--surface-page);font-size:.875rem}
+    .signal strong{display:block}
+    .filter{min-block-size:44px;padding:var(--space-2) var(--space-4);border:1px solid var(--border-default);border-radius:var(--radius-control);background:var(--surface-paper);color:var(--text-secondary);cursor:pointer}
+    .filter[aria-pressed="true"]{border-color:var(--accent-primary);background:var(--surface-warm);color:var(--accent-primary);font-weight:700}
+    .scope-line{display:flex;flex-wrap:wrap;align-items:center;gap:var(--space-2);margin:0 0 var(--space-6);padding:var(--space-4);background:var(--surface-warm);border-radius:var(--radius-card);font-weight:700}
+    .scope-line span{white-space:nowrap}
+    .scope-line b{color:var(--accent-primary);font-variant-numeric:tabular-nums}
+    .tasks{display:grid;gap:var(--space-3);padding:0;margin:0;list-style:none}
+    .task{display:grid;grid-template-columns:2rem minmax(0,1fr) minmax(10rem,auto);align-items:start;gap:var(--space-4);padding:var(--space-4);border-block-start:1px solid var(--border-default)}
+    .task:first-child{border-block-start:0}
+    .task[hidden]{display:none}
+    .task__no{display:grid;place-items:center;inline-size:2rem;block-size:2rem;border-radius:50%;background:var(--surface-warm);font-size:.75rem;font-weight:700}
+    .task h4{margin:0;font-size:1rem;word-break:keep-all}
+    .task p{margin:var(--space-1) 0 0;color:var(--text-secondary);font-size:.875rem;word-break:keep-all}
+    .role{justify-self:end;font-size:.875rem;font-weight:700;text-align:end;word-break:keep-all}
+    .role[data-role="ai"]{color:var(--status-success)}
+    .role[data-role="assisted"]{color:var(--status-warning)}
+    .role[data-role="human_input"],.role[data-role="human_final"]{color:var(--status-human)}
+    .role[data-role="integration"]{color:var(--status-warning)}
+    .parent-lock{display:flex;align-items:flex-start;justify-content:space-between;gap:var(--space-5);margin-block-end:var(--space-6);padding-block-end:var(--space-5);border-block-end:1px solid var(--border-default)}
+    .parent-lock h3{margin:0;font-size:1.5rem;word-break:keep-all}
+    .parent-lock p{margin:var(--space-1) 0 0;color:var(--text-secondary)}
+    .map-lane{display:grid;grid-template-columns:7rem minmax(0,1fr);gap:var(--space-4);padding:var(--space-5);border-block-start:1px solid var(--border-default)}
+    .map-lane:first-child{border-block-start:0}
+    .map-lane strong{word-break:keep-all}
+    .map-items{display:flex;flex-wrap:wrap;gap:var(--space-2)}
+    .map-item{padding:var(--space-2) var(--space-3);border-radius:var(--radius-control);background:var(--surface-warm);font-size:.875rem;word-break:keep-all}
+    .discussion{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(16rem,.7fr);gap:var(--space-6)}
+    .verdict{padding:var(--space-8);background:var(--surface-dark);color:var(--surface-paper);border-radius:var(--radius-region)}
+    .verdict h3{margin:0;font-size:1.5rem;word-break:keep-all}
+    .verdict__value{margin:var(--space-4) 0;font-size:clamp(1.75rem,4vw,2.5rem);font-weight:800;color:var(--surface-warm);word-break:keep-all}
+    .decision-list{margin:0;padding-inline-start:1.25rem}
+    .notice{margin-block-start:var(--space-8);padding:var(--space-5);border-inline-start:4px solid var(--status-human);background:var(--surface-warm);border-radius:0 var(--radius-card) var(--radius-card) 0;word-break:keep-all}
+    .empty{padding:var(--space-8);text-align:center;color:var(--text-secondary)}
+    @media (max-width:768px){
+      .progress__inner{padding-block:var(--space-2)}
+      .progress button{padding-inline:var(--space-3)}
+      .progress .step-label{display:none}
+      .progress button[aria-selected="true"] .step-label{display:inline}
+      .page-head{grid-template-columns:1fr;align-items:start}
+      .pager{justify-self:start}
+      .task{grid-template-columns:2rem minmax(0,1fr)}
+      .role{grid-column:2;justify-self:start;text-align:start}
+      .discussion{grid-template-columns:1fr}
+      .map-lane{grid-template-columns:1fr}
+    }
+    @media (max-width:480px){
+      .hero{padding-block-start:var(--space-8)}
+      .shell{padding-block-start:var(--space-8)}
+      .paper{padding:var(--space-4)}
+      .parent-lock{display:block}
+      .parent-lock .badge{margin-block-start:var(--space-3)}
+      .glossary dl{grid-template-columns:1fr;gap:var(--space-1)}
+      .glossary dd{margin-block-end:var(--space-4)}
+    }
+    @media print{
+      .progress,.pager,.filters,.skip-link{display:none!important}
+      .page[hidden]{display:block!important}
+      .page{break-before:page;animation:none}
+      body{background:var(--surface-paper)}
+      .shell{max-inline-size:none}
+    }
+    @media (prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;animation:none!important;transition:none!important}button:active{transform:none}}
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#main">본문으로 바로가기</a>
+  <header class="hero">
+    <div class="hero__inner">
+      <p class="eyebrow">업무 후보 선정 · 팀 토의용</p>
+      <h1 id="hero-title">업무를 한 단계씩 살펴봅니다</h1>
+      <div class="hero__meta" id="hero-meta"></div>
+    </div>
+  </header>
+  <nav class="progress" aria-label="선정 보드 단계">
+    <div class="progress__inner" role="tablist" aria-label="화면 선택">
+      <button id="tab-intro" type="button" role="tab" aria-controls="page-intro" data-page="intro"><span class="step-no">01</span><span class="step-label">결과 읽는 방법</span></button>
+      <button id="tab-overview" type="button" role="tab" aria-controls="page-overview" data-page="overview"><span class="step-no">02</span><span class="step-label">전체 업무 지도</span></button>
+      <button id="tab-lv4" type="button" role="tab" aria-controls="page-lv4" data-page="lv4"><span class="step-no">03</span><span class="step-label">프로세스 보기 · LV4</span></button>
+      <button id="tab-lv5" type="button" role="tab" aria-controls="page-lv5" data-page="lv5"><span class="step-no">04</span><span class="step-label">후보 업무 보기 · LV5</span></button>
+      <button id="tab-lv6" type="button" role="tab" aria-controls="page-lv6" data-page="lv6"><span class="step-no">05</span><span class="step-label">세부 업무 보기 · LV6</span></button>
+      <button id="tab-final" type="button" role="tab" aria-controls="page-final" data-page="final"><span class="step-no">06</span><span class="step-label">팀 최종 토의</span></button>
+    </div>
+  </nav>
+  <main id="main" class="shell">
+    <section id="page-intro" class="page" role="tabpanel" aria-labelledby="tab-intro" data-page-panel="intro"></section>
+    <section id="page-overview" class="page" role="tabpanel" aria-labelledby="tab-overview" data-page-panel="overview" hidden></section>
+    <section id="page-lv4" class="page" role="tabpanel" aria-labelledby="tab-lv4" data-page-panel="lv4" hidden></section>
+    <section id="page-lv5" class="page" role="tabpanel" aria-labelledby="tab-lv5" data-page-panel="lv5" hidden></section>
+    <section id="page-lv6" class="page" role="tabpanel" aria-labelledby="tab-lv6" data-page-panel="lv6" hidden></section>
+    <section id="page-final" class="page" role="tabpanel" aria-labelledby="tab-final" data-page-panel="final" hidden></section>
+  </main>
+  <script id="moderator-data" type="application/json">__MODERATOR_DATA__</script>
+  __ATF_DATA__
+  <script>
+  (()=>{
+    'use strict';
+    const data=JSON.parse(document.getElementById('moderator-data').textContent);
+    const pages=['intro','overview','lv4','lv5','lv6','final'];
+    const state={page:'intro',lv4:0,lv5:0,filter:'all'};
+    const roleLabels={ai:'AI 처리',assisted:'AI 보조 + 사람 판단',human_input:'사람이 준비',integration:'시스템 연결 필요',human_final:'사람이 최종 책임'};
+    const roleGroups={all:['ai','assisted','human_input','integration','human_final'],ai:['ai','assisted'],human:['human_input','human_final'],integration:['integration']};
+    const signalLabels={met:'충족',unmet:'미충족',unknown:'미확인'};
+    const statusMeta={green:['추천 후보','success'],yellow:['확인 후 후보','warning'],red:['대안 검토','error'],excluded:['후보 제외','error']};
+    const esc=(v)=>String(v??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
+    const currentLv4=()=>data.lv4s[state.lv4];
+    const currentLv5=()=>currentLv4()?.lv5s[state.lv5];
+    const selectedLv5=()=>data.lv4s.flatMap(item=>item.lv5s).find(item=>item.id===data.selection?.selectedLv5Id);
+    const countRoles=(lv5)=>lv5.lv6s.reduce((acc,item)=>{acc[item.role]=(acc[item.role]||0)+1;return acc},{ai:0,assisted:0,human_input:0,integration:0,human_final:0});
+    const pageHead=(kicker,title,lead,pager='')=>`<div class="page-head"><div><p class="page-kicker">${esc(kicker)}</p><h2>${esc(title)}</h2><p class="lead">${esc(lead)}</p></div>${pager}</div>`;
+    const pager=(kind,index,total)=>`<div class="pager" aria-label="${esc(kind)} 페이지 이동"><button type="button" data-pager="${esc(kind)}" data-dir="-1" aria-label="이전 ${esc(kind)}" ${index===0?'disabled':''}>←</button><div class="pager__label" aria-live="polite">${index+1} / ${total}</div><button type="button" data-pager="${esc(kind)}" data-dir="1" aria-label="다음 ${esc(kind)}" ${index===total-1?'disabled':''}>→</button></div>`;
+    const badges=(lv5)=>{
+      const meta=statusMeta[lv5.eligible?lv5.status:'excluded'];
+      return `<div class="badges"><span class="badge" data-tone="${meta[1]}">${meta[0]}</span><span class="badge">Pain Point ${lv5.painPoints.count} · 업무상 불편 정도 ${esc(lv5.painPoints.severity)}</span><span class="badge">AI 전환 추천 ${lv5.aiRecommendationCount}</span></div>`;
+    };
+    function renderIntro(){
+      const glossary=data.glossary.map(item=>`<dt>${esc(item.term)}</dt><dd>${esc(item.meaning)}</dd>`).join('');
+      document.getElementById('page-intro').innerHTML=pageHead('01 · 시작','결과를 읽는 방법','점수표가 아니라 팀이 후보를 좁히고 토의하는 지도입니다.')+`<div class="intro-grid"><article class="guide"><h3>먼저 전체를 봅니다</h3><p>전체 업무 지도에서 업무 영역과 프로세스 분포를 확인합니다.</p></article><article class="guide"><h3>한 단계씩 좁힙니다</h3><p>프로세스(LV4), 후보 업무(LV5), 세부 업무(LV6)를 차례로 봅니다.</p></article><article class="guide"><h3>사람의 일은 지우지 않습니다</h3><p>사람이 자료를 준비하거나 최종 책임지는 단계는 자동화 대상에서 제외하고 시작·정지 경계로 남깁니다.</p></article></div><section class="paper glossary" aria-labelledby="glossary-title"><h3 id="glossary-title">익숙하지 않은 용어</h3><dl>${glossary}</dl></section>`;
+    }
+    function renderOverview(){
+      const groups=new Map();
+      data.lv4s.forEach(item=>{if(!groups.has(item.lv3))groups.set(item.lv3,[]);groups.get(item.lv3).push(item)});
+      const lanes=[...groups].map(([lv3,items])=>`<div class="map-lane"><strong>${esc(lv3)}<span class="meta"> · 업무 영역(LV3)</span></strong><div class="map-items">${items.map(item=>`<span class="map-item">${esc(item.name)} · 후보 ${item.lv5s.filter(v=>v.eligible).length}</span>`).join('')}</div></div>`).join('');
+      document.getElementById('page-overview').innerHTML=pageHead('02 · 전체','전체 업무 지도','업무 영역별 프로세스와 후보 수를 먼저 비교합니다.')+`<div class="paper">${lanes}</div>`;
+    }
+    function renderLv4(){
+      const item=currentLv4();
+      const candidates=item.lv5s.filter(v=>v.eligible).length;
+      const aiTasks=item.lv5s.flatMap(v=>v.lv6s).filter(v=>['ai','assisted'].includes(v.role)).length;
+      const cards=item.lv5s.map(v=>`<article class="card ${v.eligible?'':'card--excluded'}"><span class="meta">${esc(v.id)} · 후보 업무(LV5)</span><h3>${esc(v.name)}</h3>${badges(v)}<p>${esc(v.evidence)}</p></article>`).join('');
+      document.getElementById('page-lv4').innerHTML=pageHead('03 · 프로세스','프로세스 보기 · LV4',`${item.lv3} 아래의 프로세스를 한 개씩 살펴봅니다.`,pager('프로세스',state.lv4,data.lv4s.length))+`<article class="paper card--current"><span class="meta">${esc(item.id)} · 프로세스(LV4)</span><h3>${esc(item.name)}</h3><div class="summary-grid"><p><strong>${esc(item.frequency)}</strong><br>반복 주기</p><p><strong>${candidates}</strong><br>선택 가능한 후보</p><p><strong>${aiTasks}</strong><br>AI 처리·보조 세부 업무</p></div></article><div class="candidate-grid candidate-grid--spaced">${cards}</div>`;
+    }
+    function renderLv5(){
+      const lv4=currentLv4();const item=currentLv5();
+      if(!item){document.getElementById('page-lv5').innerHTML='<div class="empty">이 프로세스에는 후보 업무가 없습니다.</div>';return}
+      const signals=Object.entries(item.signals).map(([name,value])=>`<div class="signal"><strong>${esc(name)}</strong>${esc(signalLabels[value])}</div>`).join('');
+      const roles=countRoles(item);const aiScope=roles.ai+roles.assisted;
+      document.getElementById('page-lv5').innerHTML=pageHead('04 · 후보','후보 업무 보기 · LV5',`${lv4.name} 안의 후보를 한 개씩 비교합니다.`,pager('후보 업무',state.lv5,lv4.lv5s.length))+`<article class="card card--current ${item.eligible?'':'card--excluded'}"><span class="meta">부모 ${esc(lv4.id)} · ${esc(lv4.name)}</span><h3>${esc(item.name)} <span class="meta">${esc(item.id)}</span></h3>${badges(item)}<p>${esc(item.evidence)}</p><div class="signals">${signals}</div><p class="notice">원 업무 ${item.lv6s.length}개 중 AI 처리·보조 범위는 ${aiScope}개입니다. 사람이 맡는 시작·종료 단계는 후보 수에서 빼되 흐름에는 남깁니다.</p></article>`;
+    }
+    function renderLv6(){
+      const item=currentLv5();
+      if(!item){document.getElementById('page-lv6').innerHTML='<div class="empty">먼저 후보 업무를 선택하십시오.</div>';return}
+      const roles=countRoles(item);const filters=[['all','전체'],['ai','AI 범위'],['human','사람 유지'],['integration','연동 필요']].map(([value,label])=>`<button type="button" class="filter" data-filter="${value}" aria-pressed="${state.filter===value}">${label}</button>`).join('');
+      const tasks=item.lv6s.map((task,index)=>`<li class="task" data-role-row="${task.role}" ${roleGroups[state.filter].includes(task.role)?'':'hidden'}><span class="task__no">${index+1}</span><div><h4>${esc(task.name)} <span class="meta">${esc(task.id)}</span></h4><p>${esc(task.reason)}</p></div><span class="role" data-role="${task.role}">${esc(roleLabels[task.role])}</span></li>`).join('');
+      document.getElementById('page-lv6').innerHTML=pageHead('05 · 세부 업무','세부 업무 보기 · LV6','현재 후보의 하위 업무만 보여줍니다. 다른 후보의 세부 업무와 섞이지 않습니다.')+`<article class="paper"><div class="parent-lock"><div><span class="meta">선택한 부모 · 후보 업무(LV5)</span><h3>${esc(item.name)}</h3><p>${esc(item.id)}</p></div><span class="badge" data-tone="${statusMeta[item.eligible?item.status:'excluded'][1]}">${statusMeta[item.eligible?item.status:'excluded'][0]}</span></div><p class="scope-line"><span>원 업무 <b>${item.lv6s.length}</b></span><span>→ AI 범위 <b>${roles.ai+roles.assisted}</b></span><span>→ 사람이 준비 <b>${roles.human_input}</b></span><span>→ 연동 필요 <b>${roles.integration}</b></span><span>→ 사람이 책임 <b>${roles.human_final}</b></span></p><div class="filters" aria-label="세부 업무 역할 필터">${filters}</div><ol class="tasks">${tasks}</ol></article>`;
+    }
+    function renderFinal(){
+      const item=selectedLv5()||currentLv5();
+      const verdict=data.selection?.finalized?data.selection.verdict:'판정 전';
+      const condition=data.selection?.finalized?data.selection.condition:'팀이 후보를 고르고 확인할 항목과 가치를 대화한 뒤 판정합니다.';
+      const roles=item?countRoles(item):{human_input:0,human_final:0,integration:0};
+      document.getElementById('page-final').innerHTML=pageHead('06 · 결정','팀 최종 토의','코치의 판정은 참고입니다. 실제 구축 범위와 책임은 팀과 조직이 결정합니다.')+`<div class="discussion"><article class="verdict"><span class="meta">${item?esc(item.id):'선택 전'}</span><h3>${item?esc(item.name):'아직 선택한 후보가 없습니다'}</h3><p class="verdict__value">${esc(verdict)}</p><p>${esc(condition)}</p></article><article class="paper"><h3>토의할 경계</h3><ul class="decision-list"><li>사람이 준비하는 단계 ${roles.human_input}개</li><li>시스템 연결이 필요한 단계 ${roles.integration}개</li><li>사람이 최종 책임지는 단계 ${roles.human_final}개</li><li>알림·제출·승인·지급은 사람의 최종 확인 전 실행하지 않음</li></ul></article></div><p class="notice">※ 이 트리는 교육 과정의 참고용 판단입니다. 실제 구축 여부·범위의 최종 결정과 책임은 팀과 조직에 있습니다.</p>`;
+    }
+    function render(){renderIntro();renderOverview();renderLv4();renderLv5();renderLv6();renderFinal();activate(state.page,false)}
+    function activate(page,focus=true){
+      state.page=pages.includes(page)?page:'intro';
+      document.querySelectorAll('[data-page-panel]').forEach(panel=>panel.hidden=panel.dataset.pagePanel!==state.page);
+      document.querySelectorAll('[data-page]').forEach(button=>{const active=button.dataset.page===state.page;button.setAttribute('aria-selected',String(active));button.tabIndex=active?0:-1});
+      if(focus)document.querySelector(`[data-page="${state.page}"]`)?.focus();
+      history.replaceState(null,'',`#${state.page}`);
+    }
+    document.addEventListener('click',event=>{
+      const pageButton=event.target.closest('[data-page]');if(pageButton){activate(pageButton.dataset.page);return}
+      const pageMove=event.target.closest('[data-pager]');if(pageMove){const direction=Number(pageMove.dataset.dir);if(pageMove.dataset.pager==='프로세스'){state.lv4=Math.max(0,Math.min(data.lv4s.length-1,state.lv4+direction));state.lv5=0}else{state.lv5=Math.max(0,Math.min(currentLv4().lv5s.length-1,state.lv5+direction))}render();return}
+      const filter=event.target.closest('[data-filter]');if(filter){state.filter=filter.dataset.filter;renderLv6();return}
+    });
+    document.querySelector('[role="tablist"]').addEventListener('keydown',event=>{
+      const current=pages.indexOf(state.page);let next=current;
+      if(event.key==='ArrowRight')next=(current+1)%pages.length;else if(event.key==='ArrowLeft')next=(current-1+pages.length)%pages.length;else if(event.key==='Home')next=0;else if(event.key==='End')next=pages.length-1;else return;
+      event.preventDefault();activate(pages[next]);
+    });
+    document.getElementById('hero-title').textContent=`${data.meta.team} 업무 후보 선정 보드`;
+    document.getElementById('hero-meta').innerHTML=`<span>${esc(data.meta.generatedAt)}</span><span>입력 ${data.meta.inputs.length}종</span><span>가상 예시 데이터</span>`;
+    const initial=location.hash.slice(1);if(pages.includes(initial))state.page=initial;
+    render();
+  })();
+  </script>
+</body>
+</html>

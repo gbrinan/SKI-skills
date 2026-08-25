@@ -1,0 +1,113 @@
+{
+  "meta": {
+    "team": "경영전략팀",
+    "generatedAt": "2026-08-25",
+    "inputs": ["업무 구조 정의서", "업무상 불편 매핑", "업무 흐름 설계서"],
+    "fictional": true
+  },
+  "glossary": [
+    {"term": "Pain Point(업무상 불편·병목)", "meaning": "시간이 많이 들거나 오류·대기가 반복되는 지점입니다."},
+    {"term": "Human in the Loop(사람 개입)", "meaning": "AI가 처리한 뒤 사람이 판단·검토·승인하는 방식입니다."},
+    {"term": "AI 에이전트", "meaning": "상황에 따라 다음 일을 판단해 여러 단계를 이어서 수행합니다."},
+    {"term": "AI 스킬", "meaning": "정해진 입력을 받아 한 가지 일을 반복해서 수행합니다."},
+    {"term": "판단 기준", "meaning": "후보로 볼 조건이 충족됐는지 확인하는 기준입니다."},
+    {"term": "이전 단계로 되돌아감", "meaning": "오류나 누락이 있으면 앞 단계로 돌아가 다시 처리합니다."}
+  ],
+  "lv4s": [
+    {
+      "id": "P-S1-1", "name": "시장·전략 정보 관리", "lv3": "중장기 전략", "frequency": "매주 반복",
+      "lv5s": [
+        {
+          "id": "T-S1-1-1", "name": "시장 동향 브리핑", "eligible": true, "status": "green",
+          "painPoints": {"count": 2, "severity": "높음"}, "aiRecommendationCount": 2,
+          "evidence": "여러 출처를 모아 중요도를 판단하고 요약한 뒤 사람이 발행 여부를 확인합니다.",
+          "signals": {"반복성":"met","위임 가능성":"met","다단계성":"met","순서 가변성":"met","검증 가능성":"met"},
+          "lv6s": [
+            {"id":"A-S1-1-1-1","name":"구독 리포트·공시 자료 가져오기","role":"integration","reason":"외부 자료 접근 권한과 시스템 연결이 먼저 필요합니다."},
+            {"id":"A-S1-1-1-2","name":"중요 기사 선별·중복 제거","role":"ai","reason":"정해진 출처와 기준으로 반복 처리할 수 있습니다."},
+            {"id":"A-S1-1-1-3","name":"주간 브리핑 초안 작성","role":"assisted","reason":"AI가 초안을 만들고 담당자가 맥락과 중요도를 판단합니다."},
+            {"id":"A-S1-1-1-4","name":"브리핑 발행 승인","role":"human_final","reason":"외부 공유 여부와 최종 문구는 담당자가 책임집니다."}
+          ]
+        },
+        {
+          "id": "T-S1-1-2", "name": "전략 방향 수립", "eligible": false, "status": "red",
+          "painPoints": {"count": 0, "severity": "낮음"}, "aiRecommendationCount": 0,
+          "evidence": "핵심 단계가 경영 판단과 합의이며 AI에 맡길 독립 업무가 두 개보다 적습니다.",
+          "signals": {"반복성":"unmet","위임 가능성":"unmet","다단계성":"met","순서 가변성":"met","검증 가능성":"met"},
+          "lv6s": [
+            {"id":"A-S1-1-2-1","name":"워크숍 의견 자료 준비","role":"human_input","reason":"회의에서 나온 비정형 의견과 오프라인 자료를 사람이 모읍니다."},
+            {"id":"A-S1-1-2-2","name":"전략 선택지 비교표 초안","role":"assisted","reason":"AI가 정리를 돕지만 선택 기준은 경영진이 판단합니다."},
+            {"id":"A-S1-1-2-3","name":"전략 방향 확정","role":"human_final","reason":"조직 방향에 대한 최종 결정과 책임은 경영진에게 있습니다."}
+          ]
+        }
+      ]
+    },
+    {
+      "id": "P-S2-1", "name": "연간 사업계획 수립", "lv3": "사업계획·성과관리", "frequency": "연 1회·여러 차례 보완",
+      "lv5s": [
+        {
+          "id": "T-S2-1-1", "name": "부문 계획 취합·검증", "eligible": true, "status": "yellow",
+          "painPoints": {"count": 2, "severity": "높음"}, "aiRecommendationCount": 2,
+          "evidence": "버전 취합과 정합성 검사는 위임 가능하지만 재제출 기준은 팀 확인이 필요합니다.",
+          "signals": {"반복성":"met","위임 가능성":"met","다단계성":"met","순서 가변성":"met","검증 가능성":"unknown"},
+          "lv6s": [
+            {"id":"A-S2-1-1-1","name":"부문 제출 파일 모으기","role":"human_input","reason":"보안 저장소나 메일에서 자료를 가져오는 권한은 담당자에게 있습니다."},
+            {"id":"A-S2-1-1-2","name":"제출본 버전·필수 항목 확인","role":"ai","reason":"파일명·버전·필수 칸을 규칙으로 검사할 수 있습니다."},
+            {"id":"A-S2-1-1-3","name":"수치·설명 불일치 후보 정리","role":"assisted","reason":"AI가 의심 항목을 찾고 담당자가 실제 오류인지 판단합니다."},
+            {"id":"A-S2-1-1-4","name":"보완 요청 발송 승인","role":"human_final","reason":"부문에 보낼 문구와 기한은 담당자가 최종 확인합니다."}
+          ]
+        },
+        {
+          "id": "T-S2-1-2", "name": "은행 확인 서류 반영", "eligible": false, "status": "excluded",
+          "painPoints": {"count": 1, "severity": "중간"}, "aiRecommendationCount": 0,
+          "evidence": "은행 방문과 원본 확인이 핵심이라 자동화 후보에서는 빼고 입력 경계로 남깁니다.",
+          "signals": {"반복성":"met","위임 가능성":"unmet","다단계성":"met","순서 가변성":"unmet","검증 가능성":"met"},
+          "lv6s": [
+            {"id":"A-S2-1-2-1","name":"은행에서 확인 서류 수령","role":"human_input","reason":"현장 방문과 신분 확인이 필요한 물리 업무입니다."},
+            {"id":"A-S2-1-2-2","name":"서류 스캔본 등록","role":"human_input","reason":"원본 상태를 확인한 사람이 스캔본을 준비합니다."},
+            {"id":"A-S2-1-2-3","name":"반영 내용 승인","role":"human_final","reason":"공식 계획에 반영할지는 담당자가 책임집니다."}
+          ]
+        }
+      ]
+    },
+    {
+      "id": "P-S3-1", "name": "경영회의 운영", "lv3": "회의체·보고", "frequency": "매월 반복",
+      "lv5s": [
+        {
+          "id": "T-S3-1-1", "name": "회의 후속 조치 관리", "eligible": true, "status": "yellow",
+          "painPoints": {"count": 1, "severity": "중간"}, "aiRecommendationCount": 2,
+          "evidence": "회의 기록을 정리하고 담당·기한을 추출할 수 있지만 확정 전에 참석자 검토가 필요합니다.",
+          "signals": {"반복성":"met","위임 가능성":"met","다단계성":"met","순서 가변성":"unknown","검증 가능성":"met"},
+          "lv6s": [
+            {"id":"A-S3-1-1-1","name":"회의 기록 가져오기","role":"integration","reason":"회의 시스템 또는 녹취 저장소와 연결해야 합니다."},
+            {"id":"A-S3-1-1-2","name":"결정 사항·할 일 초안 추출","role":"ai","reason":"반복되는 형식으로 기록에서 항목을 뽑을 수 있습니다."},
+            {"id":"A-S3-1-1-3","name":"담당자·기한 확인","role":"assisted","reason":"AI가 후보를 제안하고 참석자가 실제 책임자를 확인합니다."},
+            {"id":"A-S3-1-1-4","name":"회의록 확정·배포","role":"human_final","reason":"공식 기록과 배포 대상은 회의 주관자가 최종 책임집니다."}
+          ]
+        }
+      ]
+    }
+  ],
+  "selection": {
+    "finalized": true,
+    "selectedLv5Id": "T-S1-1-1",
+    "verdict": "권장",
+    "condition": "외부 자료 접근 권한과 발행 전 담당자 확인을 반드시 유지합니다."
+  },
+  "atfData": {
+    "verdict": "권장",
+    "process": "시장·전략 정보 관리 › 시장 동향 브리핑",
+    "targetTask": {"no": 1, "name": "시장 동향 브리핑"},
+    "engines": [
+      {"no":1,"name":"구독 리포트·공시 자료 가져오기","human":"증강","engine":"사람"},
+      {"no":2,"name":"중요 기사 선별·중복 제거","human":"자동","engine":"스킬"},
+      {"no":3,"name":"주간 브리핑 초안 작성","human":"증강","engine":"스킬"},
+      {"no":4,"name":"브리핑 발행 승인","human":"사람고유","engine":"사람"}
+    ],
+    "wrap": "여러사람_공유만",
+    "gates": {"G1":"충족","G2":"충족","G3":"충족","G4":"충족","G5":"충족","G6":"충족"},
+    "condition": "외부 자료 접근 권한과 발행 전 담당자 확인 유지",
+    "alternative": "",
+    "hoursPerWeek": 4
+  }
+}
