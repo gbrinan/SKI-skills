@@ -18,6 +18,14 @@ function expect(condition, message) {
   if (!condition) throw new Error(message);
   passed += 1;
 }
+function editJsonBlock(html, id, mutate) {
+  const pattern = new RegExp(`(<script id="${id}" type="application/json">)([\\s\\S]*?)(</script>)`);
+  const match = html.match(pattern);
+  if (!match) throw new Error(`${id} 블록이 없습니다.`);
+  const value = JSON.parse(match[2]);
+  mutate(value);
+  return html.replace(pattern, `$1${JSON.stringify(value).replaceAll('<', '\\u003c')}$3`);
+}
 
 try {
   const data = JSON.parse(await readFile(source, 'utf8'));
@@ -68,6 +76,21 @@ try {
   await writeFile(editedStatusHtml, finalSource.replace('"status":"green"', '"status":"invalid-status"'), 'utf8');
   expect(run(validator, editedStatusHtml).status !== 0, '수동 편집된 허용 목록 밖 상태가 validator를 통과함');
 
+  const malformedCases = [
+    ['team-object', 'moderator-data', value => { value.meta.team = {}; }],
+    ['eligible-string', 'moderator-data', value => { value.lv4s[0].lv5s[0].eligible = 'true'; }],
+    ['finalized-string', 'moderator-data', value => { value.selection.finalized = 'true'; }],
+    ['severity-number', 'moderator-data', value => { value.lv4s[0].lv5s[0].painPoints.severity = 7; }],
+    ['signal-markup', 'moderator-data', value => { value.lv4s[0].lv5s[0].signals['반복성'] = '<img src=x onerror=alert(1)>'; }],
+    ['target-negative', 'atf-data', value => { value.targetTask.no = -1; }],
+    ['engine-name-empty', 'atf-data', value => { value.engines[0].name = ''; }],
+  ];
+  for (const [name, id, mutate] of malformedCases) {
+    const editedHtml = join(temp, `${name}.html`);
+    await writeFile(editedHtml, editJsonBlock(finalSource, id, mutate), 'utf8');
+    expect(run(validator, editedHtml).status !== 0, `수동 편집된 ${name} 데이터가 validator를 통과함`);
+  }
+
   const hostileCount = structuredClone(data);
   hostileCount.lv4s[0].lv5s[0].painPoints.count = '</span><img src=x onerror=alert(1)>';
   const hostileCountJson = join(temp, 'hostile-count.json');
@@ -100,7 +123,7 @@ try {
   await writeFile(acronymHtml, finalSource.replace('업무 후보 선정 · 팀 토의용', 'PP'), 'utf8');
   expect(run(validator, acronymHtml).status !== 0, '설명 없는 약어가 검증을 통과함');
 
-  console.log(`테스트 통과: ${passed}개 경계`);
+  console.log(`테스트 통과: ${passed}개 계약 검증 (오류·공격성 fixture 포함)`);
 } finally {
   await rm(temp, { recursive: true, force: true });
 }
