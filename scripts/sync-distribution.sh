@@ -4,6 +4,7 @@ set -eu
 cd "$(dirname "$0")/.."
 cp skills/wireframe-moderator-coach.md .claude/skills/wireframe-moderator-coach/SKILL.md
 cp skills/wireframe-coach.md .claude/skills/wireframe-coach/SKILL.md
+rm -f "distribution/innohub/와이어프레임모더레이터코치_v1.3.md"
 for pair in "wireframe-moderator-coach.md:와이어프레임모더레이터코치_v1.4.md" "wireframe-coach.md:와이어프레임코치_v1.1.md"; do
   src="skills/${pair%%:*}"; dst="distribution/innohub/${pair##*:}"
   { head -n1 "$src"

@@ -66,6 +66,7 @@ node scripts/test-moderator-output.mjs
 - 디자인 계약: `DESIGN.md`
 - 재사용 HTML 템플릿: `assets/moderator-selection-tree-template.html`
 - 가상 예시: `examples/moderator-ui/`
+- 이노허브 배포 정본은 `distribution/innohub/와이어프레임모더레이터코치_v1.4.md` 하나입니다.
 - 판정 전 HTML에는 `atf-data`가 없어야 하며, 판정 완료본에만 포함됩니다.
 - 화면은 `Pain Point(업무상 불편·병목)`, `Human in the Loop(사람 개입)`처럼 비IT 참가자가 바로 이해할 수 있는 표현을 우선합니다.
 

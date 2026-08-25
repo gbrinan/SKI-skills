@@ -185,7 +185,7 @@
     const pager=(kind,index,total)=>`<div class="pager" aria-label="${esc(kind)} 페이지 이동"><button type="button" data-pager="${esc(kind)}" data-dir="-1" aria-label="이전 ${esc(kind)}" ${index===0?'disabled':''}>←</button><div class="pager__label" aria-live="polite">${index+1} / ${total}</div><button type="button" data-pager="${esc(kind)}" data-dir="1" aria-label="다음 ${esc(kind)}" ${index===total-1?'disabled':''}>→</button></div>`;
     const badges=(lv5)=>{
       const meta=statusMeta[lv5.eligible?lv5.status:'excluded'];
-      return `<div class="badges"><span class="badge" data-tone="${meta[1]}">${meta[0]}</span><span class="badge">Pain Point ${lv5.painPoints.count} · 업무상 불편 정도 ${esc(lv5.painPoints.severity)}</span><span class="badge">AI 전환 추천 ${lv5.aiRecommendationCount}</span></div>`;
+      return `<div class="badges"><span class="badge" data-tone="${meta[1]}">${meta[0]}</span><span class="badge">Pain Point ${esc(lv5.painPoints.count)} · 업무상 불편 정도 ${esc(lv5.painPoints.severity)}</span><span class="badge">AI 전환 추천 ${esc(lv5.aiRecommendationCount)}</span></div>`;
     };
     function renderIntro(){
       const glossary=data.glossary.map(item=>`<dt>${esc(item.term)}</dt><dd>${esc(item.meaning)}</dd>`).join('');
@@ -215,7 +215,7 @@
       const item=currentLv5();
       if(!item){document.getElementById('page-lv6').innerHTML='<div class="empty">먼저 후보 업무를 선택하십시오.</div>';return}
       const roles=countRoles(item);const filters=[['all','전체'],['ai','AI 범위'],['human','사람 유지'],['integration','연동 필요']].map(([value,label])=>`<button type="button" class="filter" data-filter="${value}" aria-pressed="${state.filter===value}">${label}</button>`).join('');
-      const tasks=item.lv6s.map((task,index)=>`<li class="task" data-role-row="${task.role}" ${roleGroups[state.filter].includes(task.role)?'':'hidden'}><span class="task__no">${index+1}</span><div><h4>${esc(task.name)} <span class="meta">${esc(task.id)}</span></h4><p>${esc(task.reason)}</p></div><span class="role" data-role="${task.role}">${esc(roleLabels[task.role])}</span></li>`).join('');
+      const tasks=item.lv6s.map((task,index)=>`<li class="task" data-role-row="${esc(task.role)}" ${roleGroups[state.filter].includes(task.role)?'':'hidden'}><span class="task__no">${index+1}</span><div><h4>${esc(task.name)} <span class="meta">${esc(task.id)}</span></h4><p>${esc(task.reason)}</p></div><span class="role" data-role="${esc(task.role)}">${esc(roleLabels[task.role])}</span></li>`).join('');
       document.getElementById('page-lv6').innerHTML=pageHead('05 · 세부 업무','세부 업무 보기 · LV6','현재 후보의 하위 업무만 보여줍니다. 다른 후보의 세부 업무와 섞이지 않습니다.')+`<article class="paper"><div class="parent-lock"><div><span class="meta">선택한 부모 · 후보 업무(LV5)</span><h3>${esc(item.name)}</h3><p>${esc(item.id)}</p></div><span class="badge" data-tone="${statusMeta[item.eligible?item.status:'excluded'][1]}">${statusMeta[item.eligible?item.status:'excluded'][0]}</span></div><p class="scope-line"><span>원 업무 <b>${item.lv6s.length}</b></span><span>→ AI 범위 <b>${roles.ai+roles.assisted}</b></span><span>→ 사람이 준비 <b>${roles.human_input}</b></span><span>→ 연동 필요 <b>${roles.integration}</b></span><span>→ 사람이 책임 <b>${roles.human_final}</b></span></p><div class="filters" aria-label="세부 업무 역할 필터">${filters}</div><ol class="tasks">${tasks}</ol></article>`;
     }
     function renderFinal(){
@@ -226,6 +226,11 @@
       document.getElementById('page-final').innerHTML=pageHead('06 · 결정','팀 최종 토의','코치의 판정은 참고입니다. 실제 구축 범위와 책임은 팀과 조직이 결정합니다.')+`<div class="discussion"><article class="verdict"><span class="meta">${item?esc(item.id):'선택 전'}</span><h3>${item?esc(item.name):'아직 선택한 후보가 없습니다'}</h3><p class="verdict__value">${esc(verdict)}</p><p>${esc(condition)}</p></article><article class="paper"><h3>토의할 경계</h3><ul class="decision-list"><li>사람이 준비하는 단계 ${roles.human_input}개</li><li>시스템 연결이 필요한 단계 ${roles.integration}개</li><li>사람이 최종 책임지는 단계 ${roles.human_final}개</li><li>알림·제출·승인·지급은 사람의 최종 확인 전 실행하지 않음</li></ul></article></div><p class="notice">※ 이 트리는 교육 과정의 참고용 판단입니다. 실제 구축 여부·범위의 최종 결정과 책임은 팀과 조직에 있습니다.</p>`;
     }
     function render(){renderIntro();renderOverview();renderLv4();renderLv5();renderLv6();renderFinal();activate(state.page,false)}
+    function focusPager(kind,direction){
+      const preferred=document.querySelector(`[data-pager="${kind}"][data-dir="${direction}"]:not(:disabled)`);
+      const fallback=document.querySelector(`[data-pager="${kind}"]:not(:disabled)`);
+      (preferred||fallback)?.focus();
+    }
     function activate(page,focus=true){
       state.page=pages.includes(page)?page:'intro';
       document.querySelectorAll('[data-page-panel]').forEach(panel=>panel.hidden=panel.dataset.pagePanel!==state.page);
@@ -235,8 +240,8 @@
     }
     document.addEventListener('click',event=>{
       const pageButton=event.target.closest('[data-page]');if(pageButton){activate(pageButton.dataset.page);return}
-      const pageMove=event.target.closest('[data-pager]');if(pageMove){const direction=Number(pageMove.dataset.dir);if(pageMove.dataset.pager==='프로세스'){state.lv4=Math.max(0,Math.min(data.lv4s.length-1,state.lv4+direction));state.lv5=0}else{state.lv5=Math.max(0,Math.min(currentLv4().lv5s.length-1,state.lv5+direction))}render();return}
-      const filter=event.target.closest('[data-filter]');if(filter){state.filter=filter.dataset.filter;renderLv6();return}
+      const pageMove=event.target.closest('[data-pager]');if(pageMove){const kind=pageMove.dataset.pager;const direction=Number(pageMove.dataset.dir);if(kind==='프로세스'){state.lv4=Math.max(0,Math.min(data.lv4s.length-1,state.lv4+direction));state.lv5=0}else{state.lv5=Math.max(0,Math.min(currentLv4().lv5s.length-1,state.lv5+direction))}render();focusPager(kind,direction);return}
+      const filter=event.target.closest('[data-filter]');if(filter){state.filter=filter.dataset.filter;renderLv6();document.querySelector(`[data-filter="${state.filter}"]`)?.focus();return}
     });
     document.querySelector('[role="tablist"]').addEventListener('keydown',event=>{
       const current=pages.indexOf(state.page);let next=current;
