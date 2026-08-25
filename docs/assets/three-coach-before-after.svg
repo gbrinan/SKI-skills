@@ -1,0 +1,98 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="760" viewBox="0 0 1200 760" role="img" aria-labelledby="title desc">
+  <title id="title">세 코치 기존 버전과 새 버전 비교</title>
+  <desc id="desc">기존의 개별 결과 중심 흐름이 LV5 전체 작업을 선택, 설계, 통합하고 직접 테스트하는 세 코치 흐름으로 바뀐 내용을 비교합니다.</desc>
+  <defs>
+    <linearGradient id="newBg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#fff8ef"/>
+      <stop offset="1" stop-color="#fff1dd"/>
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="130%">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#4d2b16" flood-opacity=".12"/>
+    </filter>
+    <style>
+      text{font-family:"Malgun Gothic","Apple SD Gothic Neo",sans-serif;fill:#28211d}
+      .canvas{fill:#f7f4ef}
+      .label{font-size:18px;font-weight:700;letter-spacing:.08em}
+      .accent-text{fill:#c84f13}
+      .legacy-text{fill:#766e68}
+      .panel{rx:24px}
+      .legacy-panel{fill:#ece9e5;stroke:#d6d0ca}
+      .new-panel{fill:url(#newBg);stroke:#d96b2b;stroke-width:2}
+      .panel-title{font-size:36px;font-weight:800}
+      .body{font-size:22px}
+      .small{font-size:18px;fill:#6f6259}
+      .legacy-mark{fill:#9a918a}
+      .new-mark{fill:#c84f13}
+      .arrow{fill:none;stroke:#c84f13;stroke-width:6;stroke-linecap:round;stroke-linejoin:round}
+      .coach-rail{fill:#28211d;rx:22px}
+      .coach-card{rx:16px}
+      .coach-card-1{fill:#fff}
+      .coach-card-2{fill:#fff7ec}
+      .coach-card-3{fill:#ffe9d1}
+      .coach{font-size:20px;font-weight:800}
+      .result{font-size:17px;fill:#6f6259}
+      .rail-arrow{font-size:30px;font-weight:800;fill:#fff}
+    </style>
+  </defs>
+  <rect width="1200" height="760" class="canvas"/>
+  <text x="64" y="64" class="label accent-text">SKI THREE-COACH WORKFLOW</text>
+  <text x="64" y="112" font-size="42" font-weight="800">무엇이 달라졌나요?</text>
+  <text x="64" y="148" class="small">개별 산출물을 만드는 방식에서 LV5 전체를 선택·설계·통합·실행하는 흐름으로 바뀌었습니다.</text>
+
+  <g transform="translate(64 190)">
+    <rect width="500" height="344" class="panel legacy-panel"/>
+    <text x="36" y="52" class="label legacy-text">기존 버전</text>
+    <text x="36" y="98" class="panel-title">결과가 따로 보였습니다</text>
+    <g transform="translate(36 132)">
+      <circle cx="12" cy="12" r="7" class="legacy-mark"/>
+      <text x="34" y="20" class="body">코치 이름과 역할이 낯설었습니다</text>
+      <circle cx="12" cy="68" r="7" class="legacy-mark"/>
+      <text x="34" y="76" class="body">LV6 한 부분만 따로 설계하기 쉬웠습니다</text>
+      <circle cx="12" cy="124" r="7" class="legacy-mark"/>
+      <text x="34" y="132" class="body">노드·HITL 같은 개발 용어가 보였습니다</text>
+      <circle cx="12" cy="180" r="7" class="legacy-mark"/>
+      <text x="34" y="188" class="body">목업·발표자료·실행 검증이 분리됐습니다</text>
+    </g>
+  </g>
+
+  <path d="M578 362h44" class="arrow"/>
+  <path d="m610 346 18 16-18 16" class="arrow"/>
+
+  <g transform="translate(636 190)" filter="url(#shadow)">
+    <rect width="500" height="344" class="panel new-panel"/>
+    <text x="36" y="52" class="label accent-text">새 버전</text>
+    <text x="36" y="98" class="panel-title">한 흐름으로 이어집니다</text>
+    <g transform="translate(36 132)">
+      <circle cx="12" cy="12" r="8" class="new-mark"/>
+      <text x="34" y="20" class="body">쉬운 한국어 코치 이름과 HTML 용도</text>
+      <circle cx="12" cy="68" r="8" class="new-mark"/>
+      <text x="34" y="76" class="body">LV5 전체 작업 10개와 예외 연결 시각화</text>
+      <circle cx="12" cy="124" r="8" class="new-mark"/>
+      <text x="34" y="132" class="body">노드 대신 작업·작업 단계·작업 수</text>
+      <circle cx="12" cy="180" r="8" class="new-mark"/>
+      <text x="34" y="188" class="body">스킬 2~3개·힌트·목업·발표·직접 실행</text>
+    </g>
+  </g>
+
+  <g transform="translate(64 574)">
+    <rect width="1072" height="124" class="coach-rail"/>
+    <g transform="translate(28 22)">
+      <rect width="282" height="80" class="coach-card coach-card-1"/>
+      <text x="20" y="32" class="coach">1. 디자인 캠프 해설 코치</text>
+      <text x="20" y="60" class="result">결과 확인 → LV5 선택</text>
+    </g>
+    <text x="326" y="72" class="rail-arrow">→</text>
+    <g transform="translate(366 22)">
+      <rect width="282" height="80" class="coach-card coach-card-2"/>
+      <text x="20" y="32" class="coach">2. 에이전트 설계 코치</text>
+      <text x="20" y="60" class="result">전체 작업 → 스킬 2~3개</text>
+    </g>
+    <text x="664" y="72" class="rail-arrow">→</text>
+    <g transform="translate(704 22)">
+      <rect width="340" height="80" class="coach-card coach-card-3"/>
+      <text x="20" y="32" class="coach">3. 스킬·에이전트 통합 코치</text>
+      <text x="20" y="60" class="result">실행 팩 → 목업·발표·직접 테스트</text>
+    </g>
+  </g>
+  <text x="600" y="734" text-anchor="middle" class="small">사람이 선택하고 확인하는 책임 지점은 모든 단계에 그대로 남습니다.</text>
+</svg>

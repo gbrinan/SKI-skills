@@ -2,6 +2,12 @@
 
 SK이노베이션 「1인 1Agent」 과정에서 쓰는 **AI 스킬(Skill) 저장소**입니다.
 
+## 기존 버전과 새 버전
+
+![세 코치 기존 버전과 새 버전 비교](docs/assets/three-coach-before-after.svg)
+
+기존에는 코치별 결과와 개발 용어가 분리되어 보였다면, 새 버전은 **LV5 선택 → 전체 작업 흐름 설계 → 실행 팩·목업·발표자료 통합**을 한 흐름으로 확인하고 직접 실습할 수 있습니다.
+
 작업 방식은 [File-based Planning Workflow](https://github.com/ahastudio/til/blob/main/ai/file-based-planning-workflow.md)
 ([원본 저장소](https://github.com/ahastudio/file-based-planning-workflow))를 그대로 따릅니다.
 
